@@ -1,0 +1,343 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: An existing tag to (re)build and attach the binaries to, e.g. v1.0.0
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build (${{ matrix.rid }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            runner: windows-latest
+            triplet: x64-windows-static
+            msvc_arch: x64
+            cmake_args: -G Ninja -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+          - rid: win-x86
+            runner: windows-latest
+            triplet: x86-windows-static
+            msvc_arch: x86
+            cmake_args: -G Ninja -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+          - rid: win-arm64
+            runner: windows-11-arm
+            triplet: arm64-windows-static
+            msvc_arch: arm64
+            cmake_args: -G Ninja -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded
+          - rid: linux-x64
+            runner: ubuntu-24.04
+            triplet: x64-linux
+            manylinux: quay.io/pypa/manylinux_2_28_x86_64
+            max_glibc: "2.28"
+            cmake_args: -G Ninja -DBINANCE_C_STATIC_CXX_RUNTIME=OFF
+          - rid: linux-arm64
+            runner: ubuntu-24.04-arm
+            triplet: arm64-linux
+            manylinux: quay.io/pypa/manylinux_2_28_aarch64
+            max_glibc: "2.28"
+            cmake_args: -G Ninja -DBINANCE_C_STATIC_CXX_RUNTIME=OFF
+          - rid: linux-arm
+            runner: ubuntu-24.04
+            triplet: arm-linux
+            cross: true
+            max_glibc: "2.36"
+            cmake_args: >-
+              -G Ninja -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=armv7l
+              -DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc -DCMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++
+              -DCMAKE_CROSSCOMPILING_EMULATOR=qemu-arm;-L;/usr/arm-linux-gnueabihf
+              -DCMAKE_CXX_FLAGS=-Wno-psabi
+          - rid: linux-musl-x64
+            runner: ubuntu-24.04
+            triplet: x64-linux
+            cmake_args: -G Ninja
+            alpine: true
+          - rid: linux-musl-arm64
+            runner: ubuntu-24.04-arm
+            triplet: arm64-linux
+            cmake_args: -G Ninja
+            alpine: true
+          - rid: osx-x64
+            runner: macos-15-intel
+            triplet: x64-osx
+            macos_min: "12.0"
+            cmake_args: -G Ninja
+          - rid: osx-arm64
+            runner: macos-15
+            triplet: arm64-osx
+            macos_min: "12.0"
+            cmake_args: -G Ninja
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Restore the vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: .vcpkg-cache
+          key: vcpkg-${{ matrix.rid }}-${{ hashFiles('vcpkg.json') }}
+
+      - name: Write the build script
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP"
+          cat > "$RUNNER_TEMP/build.sh" <<'SCRIPT'
+          set -euxo pipefail
+          
+          # Runs in the checkout. Needs: TRIPLET, CMAKE_ARGS, and RID. Optional: MAX_GLIBC, MAX_GLIBCXX and
+          # MAX_CXXABI (Linux), MACOS_MIN (macOS): the newest that the library may require.
+          export VCPKG_ROOT="$PWD/.vcpkg"
+          export VCPKG_DEFAULT_BINARY_CACHE="$PWD/.vcpkg-cache"
+          export VCPKG_DISABLE_METRICS=1
+          
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          baseline=$(sed -n 's/.*"builtin-baseline": *"\([^"]*\)".*/\1/p' vcpkg.json)
+          git clone --quiet https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+          git -C "$VCPKG_ROOT" checkout --quiet "$baseline"
+          
+          if [ "${RUNNER_OS:-}" = Windows ]; then
+            cmd //c "$(cygpath -w "$VCPKG_ROOT/bootstrap-vcpkg.bat")" -disableMetrics
+          else
+            "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics
+          fi
+
+          common=(-S . -DCMAKE_BUILD_TYPE=Release
+            "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
+            "-DVCPKG_TARGET_TRIPLET=$TRIPLET"
+            -DBINANCE_PRODUCTS= -DBINANCE_BUILD_C_API=ON -DBINANCE_BUILD_EXAMPLES=OFF)
+          
+          if [ -n "${MACOS_MIN:-}" ]; then
+            # The overlay triplets build the vcpkg ports (OpenSSL, ...) for the same macOS.
+            common+=("-DCMAKE_OSX_DEPLOYMENT_TARGET=$MACOS_MIN" "-DVCPKG_OVERLAY_TRIPLETS=$PWD/.github/vcpkg-triplets")
+            grep -q "VCPKG_OSX_DEPLOYMENT_TARGET $MACOS_MIN)" ".github/vcpkg-triplets/$TRIPLET.cmake"
+          fi
+
+          # One build: the library that is tested is the one that ships (no sanitizers).
+          # shellcheck disable=SC2086
+          cmake -B build "${common[@]}" $CMAKE_ARGS -DBINANCE_BUILD_TESTS=ON -DVCPKG_MANIFEST_FEATURES=tests
+          cmake --build build --config Release --target binance_c binance_c_tests ${BUILD_JOBS:+--parallel "$BUILD_JOBS"}
+          
+          # The C interface tests run on the platform they are built on.
+          ctest --test-dir build -C Release -R '^c_api\.' --output-on-failure
+
+          version=$(sed -n -E 's/^    VERSION ([0-9.]+)$/\1/p' CMakeLists.txt | head -n 1)
+          case "$RID" in
+            win-*)  find build -name binance_c.dll -print -quit > lib.path; name=binance_c.dll ;;
+            osx-*)  find build/c_api -maxdepth 1 -name 'libbinance_c.*.*.*.dylib' -print -quit > lib.path; name=libbinance_c.dylib ;;
+            *)      find build/c_api -maxdepth 1 -name 'libbinance_c.so.*.*.*' -print -quit > lib.path; name=libbinance_c.so ;;
+          esac
+          lib=$(cat lib.path); test -n "$lib"
+
+          # The oldest platform the library runs on must not move past what the release promises.
+          newest() { sort -uV | tail -n 1; }
+          check_floor() { # name, needed, allowed
+            echo "$1: needs ${2:-nothing} (allowed: $3)"
+            if [ -n "$2" ] && [ "$(printf '%s\n%s\n' "$2" "$3" | newest)" != "$3" ]; then
+              echo "::error::binance_c needs $1 $2, newer than $3"
+              exit 1
+            fi
+          }
+          
+          if [ -n "${MAX_GLIBC:-}" ]; then
+            needs=$(readelf -W -V "$lib")
+            check_floor glibc "$(sed -n 's/.*Name: GLIBC_\([0-9][0-9.]*\).*/\1/p' <<<"$needs" | newest)" "$MAX_GLIBC"
+            
+            if [ -n "${MAX_GLIBCXX:-}" ]; then
+              check_floor libstdc++ "$(sed -n 's/.*Name: GLIBCXX_\([0-9][0-9.]*\).*/\1/p' <<<"$needs" | newest)" "$MAX_GLIBCXX"
+              check_floor "the C++ ABI" "$(sed -n 's/.*Name: CXXABI_\([0-9][0-9.]*\).*/\1/p' <<<"$needs" | newest)" "$MAX_CXXABI"
+            fi
+          fi
+          
+          if [ -n "${MACOS_MIN:-}" ]; then
+            minos=$(otool -l "$lib" | awk '/LC_BUILD_VERSION/ { found = 1 } found && $1 == "minos" { print $2; exit }')
+            test -n "$minos"
+            check_floor macOS "$minos" "$MACOS_MIN"
+          fi
+
+          mkdir -p stage dist
+          cp "$lib" "stage/$name"
+          (cd stage && cmake -E tar cf "../dist/binance_c-$version-$RID.zip" --format=zip -- "$name")
+          SCRIPT
+
+      # Windows: the build runs in the Visual Studio environment (any installed version, found with vswhere).
+      - name: Build, test and package (Windows)
+        if: ${{ startsWith(matrix.rid, 'win-') }}
+        shell: cmd
+        env:
+          TRIPLET: ${{ matrix.triplet }}
+          CMAKE_ARGS: ${{ matrix.cmake_args }}
+          RID: ${{ matrix.rid }}
+          MSVC_ARCH: ${{ matrix.msvc_arch }}
+        run: |
+          where ninja >nul 2>nul || python -m pip install --quiet ninja
+          for /f "usebackq delims=" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath`) do set "VSINSTALL=%%i"
+          call "%VSINSTALL%\VC\Auxiliary\Build\vcvarsall.bat" %MSVC_ARCH% || exit /b 1
+          "C:\Program Files\Git\bin\bash.exe" "%RUNNER_TEMP%\build.sh"
+
+      - name: Build, test and package
+        if: ${{ !matrix.alpine && !matrix.cross && !matrix.manylinux && !startsWith(matrix.rid, 'win-') }}
+        shell: bash
+        env:
+          TRIPLET: ${{ matrix.triplet }}
+          CMAKE_ARGS: ${{ matrix.cmake_args }}
+          RID: ${{ matrix.rid }}
+          MACOS_MIN: ${{ matrix.macos_min }}
+        run: |
+          if [ "$RUNNER_OS" = macOS ]; then brew install ninja; fi
+          if [ "$RUNNER_OS" = Linux ]; then sudo apt-get update -qq && sudo apt-get install -y -qq ninja-build; fi
+          bash "$RUNNER_TEMP/build.sh"
+
+      # glibc x64 / arm64: the checkout runs on the host and the build in manylinux_2_28. MAX_GLIBCXX / MAX_CXXABI are
+      # those of AlmaLinux 8's libstdc++ (GCC 8): the library must not need more of the system's libstdc++.so.6.
+      - name: Build, test and package (manylinux)
+        if: ${{ matrix.manylinux }}
+        shell: bash
+        env:
+          TRIPLET: ${{ matrix.triplet }}
+          CMAKE_ARGS: ${{ matrix.cmake_args }}
+          RID: ${{ matrix.rid }}
+          MAX_GLIBC: ${{ matrix.max_glibc }}
+          MAX_GLIBCXX: "3.4.25"
+          MAX_CXXABI: "1.3.11"
+          IMAGE: ${{ matrix.manylinux }}
+        run: |
+          docker run --rm -v "$PWD:/src" -v "$RUNNER_TEMP/build.sh:/build.sh:ro" -w /src \
+            -e TRIPLET -e CMAKE_ARGS -e RID -e MAX_GLIBC -e MAX_GLIBCXX -e MAX_CXXABI \
+            "$IMAGE" bash -c '
+              dnf install -y -q git curl zip unzip tar perl &&
+              /opt/python/cp312-cp312/bin/python -m pip install --quiet cmake ninja &&
+              export PATH="/opt/python/cp312-cp312/bin:$PATH" &&
+              git config --global --add safe.directory "*" &&
+              bash /build.sh'
+
+      - name: Add swap (Alpine)
+        if: ${{ matrix.alpine }}
+        run: |
+          sudo fallocate -l 8G /swapfile-build
+          sudo chmod 600 /swapfile-build
+          sudo mkswap /swapfile-build
+          sudo swapon /swapfile-build
+          free -h
+
+      # musl: the checkout runs on the host and the build in an Alpine container.
+      - name: Build, test and package (Alpine)
+        if: ${{ matrix.alpine }}
+        shell: bash
+        env:
+          TRIPLET: ${{ matrix.triplet }}
+          CMAKE_ARGS: ${{ matrix.cmake_args }}
+          RID: ${{ matrix.rid }}
+          BUILD_JOBS: 2
+        run: |
+          docker run --rm -v "$PWD:/src" -v "$RUNNER_TEMP/build.sh:/build.sh:ro" -w /src \
+            -e TRIPLET -e CMAKE_ARGS -e RID -e BUILD_JOBS -e VCPKG_FORCE_SYSTEM_BINARIES=1 \
+            alpine:3.20 sh -c '
+              apk add --no-cache bash build-base cmake ninja git curl zip unzip tar perl perl-utils \
+                linux-headers pkgconf make &&
+              git config --global --add safe.directory "*" &&
+              bash /build.sh'
+
+      # Cross-compiled: the checkout runs on the host and the build in a Debian container with the Arm toolchain and QEMU.
+      - name: Build, test and package (cross-compiled)
+        if: ${{ matrix.cross }}
+        shell: bash
+        env:
+          TRIPLET: ${{ matrix.triplet }}
+          CMAKE_ARGS: ${{ matrix.cmake_args }}
+          RID: ${{ matrix.rid }}
+          MAX_GLIBC: ${{ matrix.max_glibc }}
+        run: |
+          docker run --rm -v "$PWD:/src" -v "$RUNNER_TEMP/build.sh:/build.sh:ro" -w /src \
+            -e TRIPLET -e CMAKE_ARGS -e RID -e MAX_GLIBC \
+            debian:12 bash -c '
+              apt-get update -qq &&
+              DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends \
+                build-essential g++-arm-linux-gnueabihf qemu-user ca-certificates cmake ninja-build git curl \
+                zip unzip tar pkg-config perl &&
+              git config --global --add safe.directory "*" &&
+              bash /build.sh'
+
+      - name: Upload the zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: binance_c-${{ matrix.rid }}
+          path: dist/binance_c-*-${{ matrix.rid }}.zip
+          if-no-files-found: error
+
+  release:
+    name: publish the release
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          sparse-checkout: |
+            CHANGELOG.md
+            CMakeLists.txt
+          sparse-checkout-cone-mode: false
+
+      - name: Check that the tag is the version
+        run: |
+          version=$(sed -n -E 's/^    VERSION ([0-9.]+)$/\1/p' CMakeLists.txt | head -n 1)
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::The tag $TAG is not v$version (CMakeLists.txt)"
+            exit 1
+          fi
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: binance_c-*
+          merge-multiple: true
+          path: dist
+
+      - name: Checksums
+        run: |
+          cd dist
+          version="${TAG#v}"
+          
+          if [ "$(ls binance_c-"$version"-*.zip 2>/dev/null | wc -l)" -ne 10 ]; then
+            echo "::error::Expected 10 binance_c-$version-<rid>.zip for $TAG, found: $(ls)"
+            exit 1
+          fi
+          
+          sha256sum binance_c-*.zip > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Create the release and attach the binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            version="${TAG#v}"
+            awk -v heading="## ${version} " 'index($0, heading) == 1 {p = 1; next} /^## / {p = 0} p' CHANGELOG.md > notes.md
+            test -s notes.md || { echo "::error::No CHANGELOG.md entry for $version"; exit 1; }
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$TAG" --notes-file notes.md
+          fi
+          
+          gh release upload "$TAG" dist/binance_c-*.zip dist/SHA256SUMS --clobber --repo "$GITHUB_REPOSITORY"

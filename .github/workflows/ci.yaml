@@ -1,0 +1,232 @@
+name: C++ Connector CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      preset:
+        description: Build preset (dev is a Debug build, release-tests an optimised Release build)
+        type: choice
+        options: [dev, release-tests]
+        default: dev
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CLANG_FORMAT_VERSION: 23.1.2
+  CLANG_TIDY_VERSION: 22.1.8
+
+jobs:
+  detect-targets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      modified_targets: ${{ steps.filter.outputs.modified_targets }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check version consistency
+        run: |
+          cmake_version=$(sed -n -E 's/^    VERSION ([0-9.]+)$/\1/p' CMakeLists.txt | head -n 1)
+          vcpkg_version=$(jq -r '."version-semver"' vcpkg.json)
+          
+          if [ "$cmake_version" != "$vcpkg_version" ]; then
+            echo "::error::CMakeLists.txt VERSION ($cmake_version) != vcpkg.json version-semver ($vcpkg_version)"
+            exit 1
+          fi
+          
+          port=ports/binance-connector-cpp/vcpkg.json
+          port_version=$(jq -r '."version-semver"' "$port")
+          
+          if [ "$cmake_version" != "$port_version" ]; then
+            echo "::error::CMakeLists.txt VERSION ($cmake_version) != $port version-semver ($port_version)"
+            exit 1
+          fi
+
+      - name: Check the vcpkg port has a feature for every connector
+        run: |
+          port=ports/binance-connector-cpp/vcpkg.json
+          expected=$(for dir in clients/*/; do
+            if [ -f "$dir/CMakeLists.txt" ]; then basename "$dir" | tr _ -; fi
+          done | sort)
+          
+          if [ -z "$expected" ]; then
+            echo "No connectors under clients/: nothing to check."
+            exit 0
+          fi
+          
+          features=$(jq -r '.features | keys[] | select(. != "all")' "$port" | sort)
+          all=$(jq -r '.features.all.dependencies[0].features[]' "$port" | sort)
+          
+          if [ "$expected" != "$features" ] || [ "$expected" != "$all" ]; then
+            echo "::error::$port: the features (and the features of \"all\") must be the connectors under clients/"
+            diff <(echo "$expected") <(echo "$features") || true
+            diff <(echo "$expected") <(echo "$all") || true
+            exit 1
+          fi
+
+      - name: Detect modified targets
+        id: filter
+        run: |
+          if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+            BASE_COMMIT="HEAD^"
+          else
+            BASE_COMMIT=$(git rev-list --max-parents=0 HEAD)
+          fi
+
+          all=false
+          [ "${{ github.event_name }}" = "workflow_dispatch" ] && all=true
+
+          TARGETS=()
+          if $all || ! git diff --quiet "$BASE_COMMIT" HEAD -- common c_api cmake tests CMakeLists.txt \
+              CMakePresets.json vcpkg.json Makefile .clang-format .clang-tidy .github; then
+            TARGETS+=("common")
+          fi
+          
+          for dir in clients/*/; do
+            [ -d "$dir" ] || continue
+            name=$(basename "$dir")
+            
+            if $all || ! git diff --quiet "$BASE_COMMIT" HEAD -- "clients/$name" "examples/$name"; then
+              TARGETS+=("$name")
+            fi
+          done
+
+          JSON=$(printf '%s\n' "${TARGETS[@]}" | jq -R -s -c 'split("\n") | map(select(. != ""))')
+          echo "Detected modified targets: $JSON"
+          echo "modified_targets=$JSON" >> "$GITHUB_OUTPUT"
+
+  build-target:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    needs: [detect-targets]
+    if: ${{ needs.detect-targets.outputs.modified_targets != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: ${{ fromJson(needs.detect-targets.outputs.modified_targets) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve paths and tools
+        id: paths
+        run: |
+          echo "VCPKG_ROOT=$RUNNER_TOOL_CACHE/vcpkg" >> "$GITHUB_ENV"
+          echo "VCPKG_DEFAULT_BINARY_CACHE=$RUNNER_TOOL_CACHE/vcpkg-binary-cache" >> "$GITHUB_ENV"
+          echo "PRESET=${{ inputs.preset || 'dev' }}" >> "$GITHUB_ENV"
+          echo "BUILD_DIR=$GITHUB_WORKSPACE/build/ci-${{ matrix.target }}" >> "$GITHUB_ENV"
+          echo "baseline=$(jq -r '."builtin-baseline"' vcpkg.json)" >> "$GITHUB_OUTPUT"
+          echo "CC=gcc-14" >> "$GITHUB_ENV"
+          echo "CXX=g++-14" >> "$GITHUB_ENV"
+          command -v ninja >/dev/null || sudo apt-get install -y -qq ninja-build
+          
+          jobs=$(awk -v cpus="$(nproc)" '/MemTotal/ {
+              j = int($2 / 1048576 / 4); if (j < 1) j = 1; if (j > cpus) j = cpus; print j }' /proc/meminfo)
+          
+          echo "CMAKE_BUILD_PARALLEL_LEVEL=$jobs" >> "$GITHUB_ENV"
+          echo "VCPKG_MAX_CONCURRENCY=$jobs" >> "$GITHUB_ENV"
+          
+          python3 -m venv "$RUNNER_TEMP/llvm"
+          "$RUNNER_TEMP/llvm/bin/pip" install --quiet "clang-format==$CLANG_FORMAT_VERSION" "clang-tidy==$CLANG_TIDY_VERSION"
+          
+          echo "$RUNNER_TEMP/llvm/bin" >> "$GITHUB_PATH"
+
+      - name: Restore vcpkg binary cache
+        id: vcpkg-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: vcpkg-linux-${{ steps.paths.outputs.baseline }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            vcpkg-linux-${{ steps.paths.outputs.baseline }}-
+
+      - name: Bootstrap vcpkg
+        run: |
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          git clone --quiet https://github.com/microsoft/vcpkg.git "$VCPKG_ROOT"
+          git -C "$VCPKG_ROOT" checkout --quiet "${{ steps.paths.outputs.baseline }}"
+          "$VCPKG_ROOT/bootstrap-vcpkg.sh" -disableMetrics
+
+      - name: Format Check
+        run: |
+          set -f
+          
+          if [ "${{ matrix.target }}" = "common" ]; then
+            dirs="common c_api tests"
+          else
+            dirs="clients/${{ matrix.target }} examples/${{ matrix.target }}"
+          fi
+          
+          files=$(git ls-files -- $(for d in $dirs; do echo "$d/*.cpp $d/*.hpp $d/*.h"; done))
+          [ -z "$files" ] || clang-format --dry-run --Werror $files
+
+      - name: Configure
+        run: |
+          products="${{ matrix.target }}"
+          tests="$products"
+          c_api=OFF
+          
+          # A common change is also built against one product.
+          if [ "$products" = "common" ]; then
+            products=""
+            
+            if [ -d clients/spot ]; then
+              products="spot"
+              tests="common|spot"
+            fi
+            
+            # The C interface is built and tested with the common library.
+            c_api=ON
+            tests="$tests|c_api"
+          fi
+          
+          echo "TEST_REGEX=^($tests)\." >> "$GITHUB_ENV"
+          cmake --preset "$PRESET" -B "$BUILD_DIR" -DBINANCE_PRODUCTS="$products" -DBINANCE_BUILD_EXAMPLES=OFF -DBINANCE_BUILD_C_API=$c_api
+
+      - name: Save vcpkg binary cache
+        if: always() && steps.vcpkg-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: ${{ steps.vcpkg-cache.outputs.cache-primary-key }}
+
+      - name: Build
+        run: cmake --build "$BUILD_DIR" -- -k 0
+
+      - name: Test
+        run: ctest --test-dir "$BUILD_DIR" --output-on-failure --parallel 4 -R "$TEST_REGEX"
+
+      - name: Lint
+        run: |
+          if [ "${{ matrix.target }}" = "common" ]; then
+            files='common/src/.*\.cpp$'
+          else
+            files='clients/${{ matrix.target }}/src/.*\.cpp$'
+          fi
+          
+          "$RUNNER_TEMP/llvm/bin/python" "$RUNNER_TEMP/llvm/bin/run-clang-tidy.py" -quiet -p "$BUILD_DIR" \
+            -clang-tidy-binary "$RUNNER_TEMP/llvm/bin/clang-tidy" \
+            -j "$CMAKE_BUILD_PARALLEL_LEVEL" -warnings-as-errors='*' "$files"
+
+      - name: Install and build against the installed package
+        if: matrix.target == 'common'
+        run: |
+          cmake --install "$BUILD_DIR" --prefix "$BUILD_DIR/install"
+          cmake -S tests/install -B "$BUILD_DIR/install-check" -G Ninja \
+            -DCMAKE_BUILD_TYPE="$(sed -n 's/^CMAKE_BUILD_TYPE:STRING=//p' "$BUILD_DIR/CMakeCache.txt")" \
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_MANIFEST_MODE=OFF \
+            -DVCPKG_INSTALLED_DIR="$BUILD_DIR/vcpkg_installed" \
+            -DCMAKE_PREFIX_PATH="$BUILD_DIR/install"
+          
+          cmake --build "$BUILD_DIR/install-check"
+          "$BUILD_DIR/install-check/install_check"
