@@ -1,0 +1,49 @@
+//
+// Binance C++ Connector
+// https://github.com/binance/binance-connector-cpp
+//
+// Distributed under the MIT License. See the LICENCE file.
+// Documentation: https://binance.github.io/binance-connector-cpp/
+//
+
+#include <cstdlib>
+#include <exception>
+#include <string>
+#include <utility>
+
+#include <binance/algo/rest_api.hpp>
+#include <binance/common/json.hpp>
+#include <binance/common/logger.hpp>
+
+int main() {
+    using namespace binance;
+    using namespace binance::algo::rest_api;
+
+    common::RestApiConfig cfg;
+    if (const char* key = std::getenv("API_KEY")) {
+        cfg.api_key = key;
+    }
+    if (const char* secret = std::getenv("API_SECRET")) {
+        cfg.api_secret = secret;
+    }
+    if (!cfg.api_key || !cfg.api_secret) {
+        common::Logger::error("Set API_KEY and API_SECRET");
+        return 1;
+    }
+
+    try {
+        const auto client = algo::AlgoRestApi::production(std::move(cfg));
+        const VolumeParticipationParams params{.symbol = "BTCUSDT",
+                                               .side = VolumeParticipationSideEnum::Buy,
+                                               .quantity = common::Decimal("1"),
+                                               .urgency = VolumeParticipationUrgencyEnum::Low};
+        const auto response = client.volume_participation(params);
+        common::Logger::info("volume_participation() rate limits: " +
+                             common::to_json(response.rate_limits()));
+        common::Logger::info("volume_participation() response: " +
+                             common::to_json(response.data()));
+    } catch (const std::exception& e) {
+        common::Logger::error(std::string("volume_participation() error: ") + e.what());
+        return 1;
+    }
+}

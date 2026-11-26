@@ -1,0 +1,95 @@
+//
+// Binance C++ Connector
+// https://github.com/binance/binance-connector-cpp
+//
+// Distributed under the MIT License. See the LICENCE file.
+// Documentation: https://binance.github.io/binance-connector-cpp/
+//
+
+#pragma once
+
+#include <binance/sub_account/rest_api/models/add_ip_restriction_for_sub_account_api_key_response.hpp>
+#include <binance/sub_account/rest_api/models/create_a_virtual_sub_account_response.hpp>
+#include <binance/sub_account/rest_api/models/create_sub_account_api_key_response.hpp>
+#include <binance/sub_account/rest_api/models/create_sub_account_api_key_v2_response.hpp>
+#include <binance/sub_account/rest_api/models/delete_ip_list_for_a_sub_account_api_key_response.hpp>
+#include <binance/sub_account/rest_api/models/deposit_assets_into_the_managed_sub_account_response.hpp>
+#include <binance/sub_account/rest_api/models/enable_futures_for_sub_account_response.hpp>
+#include <binance/sub_account/rest_api/models/enable_options_for_sub_account_response.hpp>
+#include <binance/sub_account/rest_api/models/futures_transfer_for_sub_account_response.hpp>
+#include <binance/sub_account/rest_api/models/get_detail_on_sub_accounts_futures_account_response.hpp>
+#include <binance/sub_account/rest_api/models/get_detail_on_sub_accounts_futures_account_response_assets_inner.hpp>
+#include <binance/sub_account/rest_api/models/get_detail_on_sub_accounts_futures_account_v2_response.hpp>
+#include <binance/sub_account/rest_api/models/get_detail_on_sub_accounts_futures_account_v2_response_delivery_account_resp.hpp>
+#include <binance/sub_account/rest_api/models/get_detail_on_sub_accounts_futures_account_v2_response_delivery_account_resp_assets_inner.hpp>
+#include <binance/sub_account/rest_api/models/get_detail_on_sub_accounts_futures_account_v2_response_future_account_resp.hpp>
+#include <binance/sub_account/rest_api/models/get_detail_on_sub_accounts_margin_account_response.hpp>
+#include <binance/sub_account/rest_api/models/get_detail_on_sub_accounts_margin_account_response_margin_trade_coeff_vo.hpp>
+#include <binance/sub_account/rest_api/models/get_detail_on_sub_accounts_margin_account_response_margin_user_asset_vo_list_inner.hpp>
+#include <binance/sub_account/rest_api/models/get_futures_position_risk_of_sub_account_response_inner.hpp>
+#include <binance/sub_account/rest_api/models/get_futures_position_risk_of_sub_account_v2_response.hpp>
+#include <binance/sub_account/rest_api/models/get_futures_position_risk_of_sub_account_v2_response_delivery_position_risk_vos_inner.hpp>
+#include <binance/sub_account/rest_api/models/get_ip_restriction_for_a_sub_account_api_key_response.hpp>
+#include <binance/sub_account/rest_api/models/get_managed_sub_account_deposit_address_response.hpp>
+#include <binance/sub_account/rest_api/models/get_move_position_history_for_sub_account_response.hpp>
+#include <binance/sub_account/rest_api/models/get_move_position_history_for_sub_account_response_future_move_position_order_vo_list_inner.hpp>
+#include <binance/sub_account/rest_api/models/get_sub_account_deposit_address_response.hpp>
+#include <binance/sub_account/rest_api/models/get_sub_account_deposit_history_response_inner.hpp>
+#include <binance/sub_account/rest_api/models/get_sub_accounts_status_on_margin_or_futures_response_inner.hpp>
+#include <binance/sub_account/rest_api/models/get_summary_of_sub_accounts_futures_account_response.hpp>
+#include <binance/sub_account/rest_api/models/get_summary_of_sub_accounts_futures_account_response_sub_account_list_inner.hpp>
+#include <binance/sub_account/rest_api/models/get_summary_of_sub_accounts_futures_account_v2_response.hpp>
+#include <binance/sub_account/rest_api/models/get_summary_of_sub_accounts_futures_account_v2_response_delivery_account_summary_resp.hpp>
+#include <binance/sub_account/rest_api/models/get_summary_of_sub_accounts_futures_account_v2_response_delivery_account_summary_resp_sub_account_list_inner.hpp>
+#include <binance/sub_account/rest_api/models/get_summary_of_sub_accounts_futures_account_v2_response_future_account_summary_resp.hpp>
+#include <binance/sub_account/rest_api/models/get_summary_of_sub_accounts_margin_account_response.hpp>
+#include <binance/sub_account/rest_api/models/get_summary_of_sub_accounts_margin_account_response_sub_account_list_inner.hpp>
+#include <binance/sub_account/rest_api/models/margin_transfer_for_sub_account_response.hpp>
+#include <binance/sub_account/rest_api/models/modify_sub_account_api_key_permission_response.hpp>
+#include <binance/sub_account/rest_api/models/move_position_for_sub_account_order_args_parameter_inner.hpp>
+#include <binance/sub_account/rest_api/models/move_position_for_sub_account_response.hpp>
+#include <binance/sub_account/rest_api/models/move_position_for_sub_account_response_move_position_orders_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_asset_details_response_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_futures_asset_details_response.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_futures_asset_details_response_snapshot_vos_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_futures_asset_details_response_snapshot_vos_inner_data.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_futures_asset_details_response_snapshot_vos_inner_data_assets_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_futures_asset_details_response_snapshot_vos_inner_data_position_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_list_response.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_list_response_manager_sub_user_info_vo_list_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_margin_asset_details_response.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_margin_asset_details_response_user_assets_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_snapshot_response.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_snapshot_response_snapshot_vos_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_snapshot_response_snapshot_vos_inner_data.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_snapshot_response_snapshot_vos_inner_data_assets_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_snapshot_response_snapshot_vos_inner_data_balances_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_snapshot_response_snapshot_vos_inner_data_position_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_snapshot_response_snapshot_vos_inner_data_user_assets_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_transfer_log_master_account_investor_response.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_transfer_log_master_account_investor_response_manager_sub_transfer_history_vos_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_transfer_log_master_account_trading_response.hpp>
+#include <binance/sub_account/rest_api/models/query_managed_sub_account_transfer_log_sub_account_trading_response.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_api_key_response.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_api_key_response_rows_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_assets_asset_management_response.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_assets_asset_management_response_balances_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_assets_response.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_assets_response_balances_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_futures_asset_transfer_history_response.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_futures_asset_transfer_history_response_transfers_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_list_response.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_list_response_sub_accounts_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_spot_asset_transfer_history_response_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_spot_assets_summary_response.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_spot_assets_summary_response_spot_sub_user_asset_btc_vo_list_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_transaction_statistics_response.hpp>
+#include <binance/sub_account/rest_api/models/query_sub_account_transaction_statistics_response_trade_info_vos_inner.hpp>
+#include <binance/sub_account/rest_api/models/query_universal_transfer_history_response.hpp>
+#include <binance/sub_account/rest_api/models/query_universal_transfer_history_response_result_inner.hpp>
+#include <binance/sub_account/rest_api/models/sub_account_futures_asset_transfer_response.hpp>
+#include <binance/sub_account/rest_api/models/sub_account_transfer_history_response_inner.hpp>
+#include <binance/sub_account/rest_api/models/transfer_to_master_response.hpp>
+#include <binance/sub_account/rest_api/models/transfer_to_sub_account_of_same_master_response.hpp>
+#include <binance/sub_account/rest_api/models/universal_transfer_response.hpp>
+#include <binance/sub_account/rest_api/models/withdrawl_assets_from_the_managed_sub_account_response.hpp>

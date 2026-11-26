@@ -1,0 +1,27 @@
+binance_add_product(crypto_loan
+    SOURCES
+        src/crypto_loan.cpp
+        src/rest_api/flexible_rate_api.cpp
+        src/rest_api/models/check_collateral_repay_rate_response.cpp
+        src/rest_api/models/flexible_loan_adjust_ltv_response.cpp
+        src/rest_api/models/flexible_loan_borrow_response.cpp
+        src/rest_api/models/flexible_loan_repay_response.cpp
+        src/rest_api/models/get_flexible_loan_assets_data_response.cpp
+        src/rest_api/models/get_flexible_loan_assets_data_response_rows_inner.cpp
+        src/rest_api/models/get_flexible_loan_borrow_history_response.cpp
+        src/rest_api/models/get_flexible_loan_borrow_history_response_rows_inner.cpp
+        src/rest_api/models/get_flexible_loan_collateral_assets_data_response.cpp
+        src/rest_api/models/get_flexible_loan_collateral_assets_data_response_rows_inner.cpp
+        src/rest_api/models/get_flexible_loan_interest_rate_history_response.cpp
+        src/rest_api/models/get_flexible_loan_interest_rate_history_response_rows_inner.cpp
+        src/rest_api/models/get_flexible_loan_liquidation_history_response.cpp
+        src/rest_api/models/get_flexible_loan_liquidation_history_response_rows_inner.cpp
+        src/rest_api/models/get_flexible_loan_ltv_adjustment_history_response.cpp
+        src/rest_api/models/get_flexible_loan_ltv_adjustment_history_response_rows_inner.cpp
+        src/rest_api/models/get_flexible_loan_ongoing_orders_response.cpp
+        src/rest_api/models/get_flexible_loan_ongoing_orders_response_rows_inner.cpp
+        src/rest_api/models/get_flexible_loan_repayment_history_response.cpp
+        src/rest_api/models/get_flexible_loan_repayment_history_response_rows_inner.cpp
+        src/rest_api/rest_api.cpp
+    TESTS
+        tests/rest_api/flexible_rate_api_test.cpp)

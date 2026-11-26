@@ -1,0 +1,10 @@
+binance_add_product(rebate
+    SOURCES
+        src/rebate.cpp
+        src/rest_api/api.cpp
+        src/rest_api/models/get_spot_rebate_history_records_response.cpp
+        src/rest_api/models/get_spot_rebate_history_records_response_data.cpp
+        src/rest_api/models/get_spot_rebate_history_records_response_data_data_inner.cpp
+        src/rest_api/rest_api.cpp
+    TESTS
+        tests/rest_api/api_test.cpp)

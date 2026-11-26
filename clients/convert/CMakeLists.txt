@@ -1,0 +1,20 @@
+binance_add_product(convert
+    SOURCES
+        src/convert.cpp
+        src/rest_api/market_data_api.cpp
+        src/rest_api/models/accept_quote_response.cpp
+        src/rest_api/models/cancel_limit_order_response.cpp
+        src/rest_api/models/get_convert_trade_history_response.cpp
+        src/rest_api/models/get_convert_trade_history_response_list_inner.cpp
+        src/rest_api/models/list_all_convert_pairs_response_inner.cpp
+        src/rest_api/models/order_status_response.cpp
+        src/rest_api/models/place_limit_order_response.cpp
+        src/rest_api/models/query_limit_open_orders_response.cpp
+        src/rest_api/models/query_limit_open_orders_response_list_inner.cpp
+        src/rest_api/models/query_order_quantity_precision_per_asset_response_inner.cpp
+        src/rest_api/models/send_quote_request_response.cpp
+        src/rest_api/rest_api.cpp
+        src/rest_api/trade_api.cpp
+    TESTS
+        tests/rest_api/market_data_api_test.cpp
+        tests/rest_api/trade_api_test.cpp)

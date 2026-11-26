@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "binance-connector-cpp",
+  "version-semver": "1.0.0",
+  "description": "Binance public API connector for C++",
+  "homepage": "https://github.com/binance/binance-connector-cpp",
+  "license": "MIT",
+  "builtin-baseline": "eb2d3a3279fd019cb7733072d86900d0ad2a1aef",
+  "dependencies": [
+    "boost-asio",
+    "boost-beast",
+    "boost-json",
+    "openssl",
+    "zlib"
+  ],
+  "features": {
+    "tests": {
+      "description": "Build the test suites",
+      "dependencies": ["gtest"]
+    }
+  }
+}

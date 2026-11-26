@@ -1,0 +1,82 @@
+//
+// Binance C++ Connector
+// https://github.com/binance/binance-connector-cpp
+//
+// Distributed under the MIT License. See the LICENCE file.
+// Documentation: https://binance.github.io/binance-connector-cpp/
+//
+
+#pragma once
+
+#include <cstdint>
+#include <optional>
+#include <string>
+
+#include <boost/json/fwd.hpp>
+#include <boost/json/value.hpp>
+
+#include <binance/derivatives_trading_options/export.hpp>
+
+namespace binance::derivatives_trading_options::websocket_streams {
+
+struct OrderTradeUpdateO {
+    /// Symbol
+    std::optional<std::string> s;
+    /// Client Order Id
+    std::optional<std::string> c;
+    /// Side
+    std::optional<std::string> s_uppercase;
+    /// Order Type
+    std::optional<std::string> o;
+    /// Time in Force
+    std::optional<std::string> f;
+    /// Original Quantity
+    std::optional<std::string> q;
+    /// Original Price
+    std::optional<std::string> p;
+    /// Average Price
+    std::optional<std::string> ap;
+    /// Execution Type
+    std::optional<std::string> x;
+    /// Order Status
+    std::optional<std::string> x_uppercase;
+    /// Order Id
+    std::optional<std::int64_t> i;
+    /// Order Last Filled Quantity
+    std::optional<std::string> l;
+    /// Order Filled Accumulated Quantity
+    std::optional<std::string> z;
+    /// Last Filled Price
+    std::optional<std::string> l_uppercase;
+    /// Commission Asset
+    std::optional<std::string> n_uppercase;
+    /// Commission, negative means fee charge
+    std::optional<std::string> n;
+    /// Order Trade Time
+    std::optional<std::int64_t> t_uppercase;
+    /// Trade Id
+    std::optional<std::int64_t> t;
+    /// Bids qty
+    std::optional<std::string> b;
+    /// Ask qty
+    std::optional<std::string> a;
+    /// Is this trade the maker side?
+    std::optional<bool> m;
+    /// Is this reduce only
+    std::optional<bool> r_uppercase;
+    /// Original Order Type
+    std::optional<std::string> ot;
+    /// Realized Profit of the trade
+    std::optional<std::string> rp;
+    /// STP mode
+    std::optional<std::string> v_uppercase;
+
+    bool operator==(const OrderTradeUpdateO& /*other*/) const = default;
+};
+
+BINANCE_DERIVATIVES_TRADING_OPTIONS_EXPORT OrderTradeUpdateO
+tag_invoke(boost::json::value_to_tag<OrderTradeUpdateO> /*tag*/, const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_OPTIONS_EXPORT void
+tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv, const OrderTradeUpdateO& v);
+
+} // namespace binance::derivatives_trading_options::websocket_streams

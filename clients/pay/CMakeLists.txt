@@ -1,0 +1,13 @@
+binance_add_product(pay
+    SOURCES
+        src/pay.cpp
+        src/rest_api/api.cpp
+        src/rest_api/models/get_pay_trade_history_response.cpp
+        src/rest_api/models/get_pay_trade_history_response_data_inner.cpp
+        src/rest_api/models/get_pay_trade_history_response_data_inner_funds_detail_inner.cpp
+        src/rest_api/models/get_pay_trade_history_response_data_inner_payer_info.cpp
+        src/rest_api/models/get_pay_trade_history_response_data_inner_receiver_info.cpp
+        src/rest_api/models/get_pay_trade_history_response_data_inner_receiver_info_extend.cpp
+        src/rest_api/rest_api.cpp
+    TESTS
+        tests/rest_api/api_test.cpp)

@@ -1,0 +1,15 @@
+binance_add_product(dual_investment
+    SOURCES
+        src/dual_investment.cpp
+        src/rest_api/market_data_api.cpp
+        src/rest_api/models/check_dual_investment_accounts_response.cpp
+        src/rest_api/models/get_dual_investment_positions_response.cpp
+        src/rest_api/models/get_dual_investment_positions_response_list_inner.cpp
+        src/rest_api/models/get_dual_investment_product_list_response.cpp
+        src/rest_api/models/get_dual_investment_product_list_response_list_inner.cpp
+        src/rest_api/models/subscribe_dual_investment_products_response.cpp
+        src/rest_api/rest_api.cpp
+        src/rest_api/trade_api.cpp
+    TESTS
+        tests/rest_api/market_data_api_test.cpp
+        tests/rest_api/trade_api_test.cpp)

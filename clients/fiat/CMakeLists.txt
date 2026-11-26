@@ -1,0 +1,18 @@
+binance_add_product(fiat
+    SOURCES
+        src/fiat.cpp
+        src/rest_api/api.cpp
+        src/rest_api/models/deposit_response.cpp
+        src/rest_api/models/deposit_response_data.cpp
+        src/rest_api/models/fiat_withdraw_request_account_info.cpp
+        src/rest_api/models/fiat_withdraw_response.cpp
+        src/rest_api/models/fiat_withdraw_response_data.cpp
+        src/rest_api/models/get_fiat_deposit_withdraw_history_response.cpp
+        src/rest_api/models/get_fiat_deposit_withdraw_history_response_data_inner.cpp
+        src/rest_api/models/get_fiat_payments_history_response.cpp
+        src/rest_api/models/get_fiat_payments_history_response_data_inner.cpp
+        src/rest_api/models/get_order_detail_response.cpp
+        src/rest_api/models/get_order_detail_response_data.cpp
+        src/rest_api/rest_api.cpp
+    TESTS
+        tests/rest_api/api_test.cpp)

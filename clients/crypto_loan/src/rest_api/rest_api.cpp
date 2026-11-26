@@ -1,0 +1,26 @@
+//
+// Binance C++ Connector
+// https://github.com/binance/binance-connector-cpp
+//
+// Distributed under the MIT License. See the LICENCE file.
+// Documentation: https://binance.github.io/binance-connector-cpp/
+//
+
+#include <binance/common/detail/utils.hpp>
+#include <binance/crypto_loan/crypto_loan.hpp>
+#include <binance/crypto_loan/rest_api/rest_api.hpp>
+
+namespace binance::crypto_loan::rest_api {
+
+RestApi::RestApi(common::RestApiConfig configuration)
+    : client_(std::make_shared<common::RestClient>(
+          std::move(configuration),
+          common::detail::ClientOptions{.user_agent =
+                                            common::detail::build_user_agent(product_name())})),
+      flexible_rate_api_(client_) {}
+
+const common::RestApiConfig& RestApi::configuration() const noexcept {
+    return client_->configuration();
+}
+
+} // namespace binance::crypto_loan::rest_api

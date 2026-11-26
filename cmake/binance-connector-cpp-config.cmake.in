@@ -1,0 +1,25 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Threads)
+# At least the Boost version the SDK was built with. The public headers include Boost.Asio templates,
+# so use the same Boost as the build when you can (see README).
+find_dependency(Boost @Boost_VERSION@ CONFIG COMPONENTS json)
+find_dependency(OpenSSL 3.0)
+find_dependency(ZLIB)
+
+include("${CMAKE_CURRENT_LIST_DIR}/binance-connector-cpp-targets.cmake")
+
+# Products are components: find_package(binance-connector-cpp CONFIG REQUIRED COMPONENTS spot wallet)
+set(binance-connector-cpp_PRODUCTS "@BINANCE_SELECTED_PRODUCTS@")
+foreach(_binance_component IN LISTS binance-connector-cpp_FIND_COMPONENTS)
+    if(TARGET binance::${_binance_component})
+        set(binance-connector-cpp_${_binance_component}_FOUND TRUE)
+    else()
+        set(binance-connector-cpp_${_binance_component}_FOUND FALSE)
+        set(binance-connector-cpp_NOT_FOUND_MESSAGE
+            "binance-connector-cpp was built without product '${_binance_component}' (available: ${binance-connector-cpp_PRODUCTS})")
+    endif()
+endforeach()
+
+check_required_components(binance-connector-cpp)

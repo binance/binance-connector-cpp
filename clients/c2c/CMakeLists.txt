@@ -1,0 +1,9 @@
+binance_add_product(c2c
+    SOURCES
+        src/c2c.cpp
+        src/rest_api/api.cpp
+        src/rest_api/models/get_c2c_trade_history_response.cpp
+        src/rest_api/models/get_c2c_trade_history_response_data_inner.cpp
+        src/rest_api/rest_api.cpp
+    TESTS
+        tests/rest_api/api_test.cpp)

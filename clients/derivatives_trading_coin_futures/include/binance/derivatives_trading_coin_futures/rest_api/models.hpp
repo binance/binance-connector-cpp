@@ -1,0 +1,83 @@
+//
+// Binance C++ Connector
+// https://github.com/binance/binance-connector-cpp
+//
+// Distributed under the MIT License. See the LICENCE file.
+// Documentation: https://binance.github.io/binance-connector-cpp/
+//
+
+#pragma once
+
+#include <binance/derivatives_trading_coin_futures/rest_api/models/account_information_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/account_information_response_assets_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/account_information_response_positions_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/account_trade_list_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/all_orders_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/auto_cancel_all_open_orders_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/basis_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_all_open_orders_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_multiple_orders_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/change_initial_leverage_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/change_margin_type_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/change_position_mode_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/check_server_time_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/compressed_aggregate_trades_list_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/continuous_contract_kline_candlestick_data_item_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/current_all_open_orders_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/exchange_information_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/exchange_information_response_rate_limits_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/exchange_information_response_symbols_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/exchange_information_response_symbols_inner_filters_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/futures_account_balance_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_current_position_mode_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_download_id_for_futures_order_history_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_download_id_for_futures_trade_history_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_download_id_for_futures_transaction_history_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_funding_rate_history_of_perpetual_futures_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_funding_rate_info_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_futures_order_history_download_link_by_id_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_futures_trade_download_link_by_id_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_futures_transaction_history_download_link_by_id_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_income_history_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_order_modify_history_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_order_modify_history_response_inner_amendment.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_order_modify_history_response_inner_amendment_orig_qty.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_order_modify_history_response_inner_amendment_price.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/get_position_margin_change_history_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/index_price_and_mark_price_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/index_price_kline_candlestick_data_item_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/keepalive_user_data_stream_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/long_short_ratio_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/modify_isolated_position_margin_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/modify_multiple_orders_batch_orders_parameter_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/modify_multiple_orders_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/modify_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/new_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/notional_bracket_for_pair_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/notional_bracket_for_pair_response_inner_brackets_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/notional_bracket_for_symbol_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/old_trades_lookup_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/open_interest_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/open_interest_statistics_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/order_book_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/place_multiple_orders_batch_orders_parameter_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/place_multiple_orders_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/position_adl_quantile_estimation_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/position_adl_quantile_estimation_response_inner_adl_quantile.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/position_information_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/premium_index_kline_data_item_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/query_current_open_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/query_index_price_constituents_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/query_index_price_constituents_response_constituents_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/query_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/recent_trades_list_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/start_user_data_stream_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/symbol_order_book_ticker_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/symbol_price_ticker_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/taker_buy_sell_volume_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/ticker24hr_price_change_statistics_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/top_trader_long_short_ratio_accounts_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/top_trader_long_short_ratio_positions_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/user_commission_rate_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/users_force_orders_response_inner.hpp>

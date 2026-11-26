@@ -1,0 +1,11 @@
+binance_add_product(copy_trading
+    SOURCES
+        src/copy_trading.cpp
+        src/rest_api/future_copy_trading_api.cpp
+        src/rest_api/models/get_futures_lead_trader_status_response.cpp
+        src/rest_api/models/get_futures_lead_trader_status_response_data.cpp
+        src/rest_api/models/get_futures_lead_trading_symbol_whitelist_response.cpp
+        src/rest_api/models/get_futures_lead_trading_symbol_whitelist_response_data_inner.cpp
+        src/rest_api/rest_api.cpp
+    TESTS
+        tests/rest_api/future_copy_trading_api_test.cpp)

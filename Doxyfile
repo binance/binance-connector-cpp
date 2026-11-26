@@ -1,0 +1,40 @@
+# API reference: `doxygen` from the repository root writes HTML to docs/html.
+# BINANCE_VERSION and BINANCE_EXPORT_MACROS come from the environment (see the docs workflow).
+
+PROJECT_NAME           = "Binance C++ Connector"
+PROJECT_NUMBER         = $(BINANCE_VERSION)
+PROJECT_BRIEF          = "Official C++ connectors for the Binance APIs"
+OUTPUT_DIRECTORY       = docs
+
+INPUT                  = README.md common/README.md common/include clients
+FILE_PATTERNS          = *.hpp *.md
+RECURSIVE              = YES
+EXCLUDE_PATTERNS       = */include/binance/*/detail/* */common/src/* */common/tests/* */clients/*/src/* \
+                         */clients/*/tests/* \
+                         */clients/*/docs/*
+EXCLUDE_SYMBOLS        = *::detail *::detail::*
+USE_MDFILE_AS_MAINPAGE = README.md
+
+EXTRACT_ALL            = YES
+JAVADOC_AUTOBRIEF      = YES
+MARKDOWN_SUPPORT       = YES
+SORT_MEMBER_DOCS       = NO
+SOURCE_BROWSER         = NO
+VERBATIM_HEADERS       = NO
+SHOW_USED_FILES        = NO
+SHOW_FILES             = NO
+
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = BINANCE_COMMON_EXPORT= $(BINANCE_EXPORT_MACROS)
+
+GENERATE_HTML          = YES
+GENERATE_TREEVIEW      = YES
+GENERATE_LATEX         = NO
+HAVE_DOT               = NO
+SEARCHENGINE           = YES
+
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_LOGFILE           = docs/warnings.log

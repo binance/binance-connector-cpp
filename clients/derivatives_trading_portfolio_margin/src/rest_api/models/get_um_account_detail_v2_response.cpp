@@ -1,0 +1,31 @@
+//
+// Binance C++ Connector
+// https://github.com/binance/binance-connector-cpp
+//
+// Distributed under the MIT License. See the LICENCE file.
+// Documentation: https://binance.github.io/binance-connector-cpp/
+//
+
+#include <binance/common/detail/json.hpp>
+#include <binance/derivatives_trading_portfolio_margin/rest_api/models/get_um_account_detail_v2_response.hpp>
+
+namespace binance::derivatives_trading_portfolio_margin::rest_api {
+
+GetUmAccountDetailV2Response
+tag_invoke(boost::json::value_to_tag<GetUmAccountDetailV2Response> /*tag*/,
+           const boost::json::value& jv) {
+    const auto& obj = common::detail::json::as_object(jv, "GetUmAccountDetailV2Response");
+    GetUmAccountDetailV2Response out;
+    common::detail::json::read(obj, "assets", out.assets);
+    common::detail::json::read(obj, "positions", out.positions);
+    return out;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                const GetUmAccountDetailV2Response& v) {
+    auto& obj = jv.emplace_object();
+    common::detail::json::write(obj, "assets", v.assets);
+    common::detail::json::write(obj, "positions", v.positions);
+}
+
+} // namespace binance::derivatives_trading_portfolio_margin::rest_api

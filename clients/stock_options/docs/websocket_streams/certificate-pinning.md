@@ -1,0 +1,54 @@
+# Certificate Pinning
+
+Pins the public key of the server certificate on top of the usual chain and host name checks, through the `agent` hook. Remember to update the pin before Binance rotates its certificate.
+
+```cpp
+#include <array>
+#include <chrono>
+#include <iostream>
+#include <thread>
+#include <utility>
+
+#include <boost/asio/ssl.hpp>
+#include <openssl/evp.h>
+#include <openssl/x509.h>
+
+#include <binance/common/json.hpp>
+#include <binance/stock_options/websocket_streams.hpp>
+
+using namespace binance;
+
+// SHA-256 of the public key (DER SubjectPublicKeyInfo) of the certificate to pin, e.g. from
+// openssl x509 -pubkey -noout -in cert.pem | openssl pkey -pubin -outform der | openssl dgst -sha256
+constexpr std::array<unsigned char, 32> kPinnedKey{/* 32 bytes */};
+
+int main() {
+    common::WebsocketStreamsConfig cfg;
+    cfg.agent = [](boost::asio::ssl::context& ctx) {
+        ctx.set_verify_callback([](bool preverified, boost::asio::ssl::verify_context& vc) {
+            X509_STORE_CTX* store = vc.native_handle();
+            // `preverified` includes the chain and host name checks: keep them, and pin the server
+            // certificate (depth 0) on top.
+            if (!preverified || X509_STORE_CTX_get_error_depth(store) != 0) {
+                return preverified;
+            }
+            std::array<unsigned char, 32> digest{};
+            unsigned int size = 0;
+            X509_pubkey_digest(X509_STORE_CTX_get_current_cert(store), EVP_sha256(), digest.data(),
+                               &size);
+            return size == digest.size() && digest == kPinnedKey;
+        });
+    };
+    auto client = stock_options::StockOptionsWebsocketStreams::production(std::move(cfg));
+    auto connection = client.connect();
+
+    using namespace stock_options::websocket_streams;
+    const OrderReportV2StreamParams params{.listen_key =
+                                               "3f9a1c2e-7b4d-4e8a-9c61-0d2f5b7e8a13"};
+    auto stream = connection.order_report_v2_stream(params);
+    stream.on_message([](const auto& event) { std::cout << common::to_json(event) << "\n"; });
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+    stream.unsubscribe();
+    connection.disconnect();
+}
+```

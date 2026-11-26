@@ -1,0 +1,37 @@
+//
+// Binance C++ Connector
+// https://github.com/binance/binance-connector-cpp
+//
+// Distributed under the MIT License. See the LICENCE file.
+// Documentation: https://binance.github.io/binance-connector-cpp/
+//
+
+#include <binance/common/detail/json.hpp>
+#include <binance/stocks/rest_api/models/tokenized_assets_response_inner.hpp>
+
+namespace binance::stocks::rest_api {
+
+TokenizedAssetsResponseInner
+tag_invoke(boost::json::value_to_tag<TokenizedAssetsResponseInner> /*tag*/,
+           const boost::json::value& jv) {
+    const auto& obj = common::detail::json::as_object(jv, "TokenizedAssetsResponseInner");
+    TokenizedAssetsResponseInner out;
+    common::detail::json::read(obj, "assetCode", out.asset_code);
+    common::detail::json::read(obj, "assetName", out.asset_name);
+    common::detail::json::read(obj, "underlyingEquitySymbol", out.underlying_equity_symbol);
+    common::detail::json::read(obj, "multiplier", out.multiplier);
+    common::detail::json::read(obj, "multiplierValid", out.multiplier_valid);
+    return out;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                const TokenizedAssetsResponseInner& v) {
+    auto& obj = jv.emplace_object();
+    common::detail::json::write(obj, "assetCode", v.asset_code);
+    common::detail::json::write(obj, "assetName", v.asset_name);
+    common::detail::json::write(obj, "underlyingEquitySymbol", v.underlying_equity_symbol);
+    common::detail::json::write(obj, "multiplier", v.multiplier);
+    common::detail::json::write(obj, "multiplierValid", v.multiplier_valid);
+}
+
+} // namespace binance::stocks::rest_api

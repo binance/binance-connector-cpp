@@ -1,0 +1,33 @@
+//
+// Binance C++ Connector
+// https://github.com/binance/binance-connector-cpp
+//
+// Distributed under the MIT License. See the LICENCE file.
+// Documentation: https://binance.github.io/binance-connector-cpp/
+//
+
+#pragma once
+
+#include <string_view>
+
+#include <binance/common/config.hpp>
+#include <binance/spot/export.hpp>
+#include <binance/spot/websocket_streams/websocket_streams.hpp>
+
+namespace binance::spot {
+
+// Declared in every module header. A block rather than NOLINTNEXTLINE: clang-format wraps the
+// declaration when the export macro is long.
+// NOLINTBEGIN(readability-redundant-declaration)
+/// Product identifier used in the User-Agent.
+[[nodiscard]] BINANCE_SPOT_EXPORT std::string_view product_name() noexcept;
+// NOLINTEND(readability-redundant-declaration)
+
+/// The Spot WebSocket streams client, created with `SpotWebsocketStreams::production(config)`
+/// and the other factories of `websocket_streams::WebsocketStreams`.
+using SpotWebsocketStreams = websocket_streams::WebsocketStreams;
+using SpotWebsocketStreamsConnection = websocket_streams::WebsocketStreamsConnection;
+using SpotWsStreams = SpotWebsocketStreams;
+using SpotWsStreamsConnection = SpotWebsocketStreamsConnection;
+
+} // namespace binance::spot

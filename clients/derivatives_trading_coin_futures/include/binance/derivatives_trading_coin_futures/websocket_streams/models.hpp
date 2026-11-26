@@ -1,0 +1,51 @@
+//
+// Binance C++ Connector
+// https://github.com/binance/binance-connector-cpp
+//
+// Distributed under the MIT License. See the LICENCE file.
+// Documentation: https://binance.github.io/binance-connector-cpp/
+//
+
+#pragma once
+
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/account_config_update.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/account_config_update_ac.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/account_update.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/account_update_a.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/account_update_ab_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/account_update_ap_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/aggregate_trade_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/all_book_tickers_stream_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/all_market_liquidation_order_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/all_market_liquidation_order_streams_response_o.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/all_market_mini_tickers_stream_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/all_market_tickers_streams_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/continuous_contract_kline_candlestick_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/continuous_contract_kline_candlestick_streams_response_k.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/contract_info_stream_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/contract_info_stream_response_bks_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/diff_book_depth_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/grid_update.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/grid_update_gu.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/index_kline_candlestick_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/index_kline_candlestick_streams_response_k.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/index_price_stream_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/individual_symbol_book_ticker_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/individual_symbol_mini_ticker_stream_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/individual_symbol_ticker_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/kline_candlestick_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/kline_candlestick_streams_response_k.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/listen_key_expired.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/margin_call.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/margin_call_p_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/mark_price_kline_candlestick_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/mark_price_kline_candlestick_streams_response_k.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/mark_price_of_all_symbols_of_a_pair_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/mark_price_stream_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/market_liquidation_order_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/order_trade_update.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/order_trade_update_o.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/partial_book_depth_streams_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/strategy_update.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/strategy_update_su.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/user_data_stream_events_response.hpp>

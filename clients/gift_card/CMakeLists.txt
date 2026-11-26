@@ -1,0 +1,17 @@
+binance_add_product(gift_card
+    SOURCES
+        src/gift_card.cpp
+        src/rest_api/market_data_api.cpp
+        src/rest_api/models/create_a_dual_token_gift_card_response.cpp
+        src/rest_api/models/create_a_dual_token_gift_card_response_data.cpp
+        src/rest_api/models/create_a_single_token_gift_card_response.cpp
+        src/rest_api/models/fetch_rsa_public_key_response.cpp
+        src/rest_api/models/fetch_token_limit_response.cpp
+        src/rest_api/models/fetch_token_limit_response_data_inner.cpp
+        src/rest_api/models/redeem_a_binance_gift_card_response.cpp
+        src/rest_api/models/redeem_a_binance_gift_card_response_data.cpp
+        src/rest_api/models/verify_binance_gift_card_by_gift_card_number_response.cpp
+        src/rest_api/models/verify_binance_gift_card_by_gift_card_number_response_data.cpp
+        src/rest_api/rest_api.cpp
+    TESTS
+        tests/rest_api/market_data_api_test.cpp)

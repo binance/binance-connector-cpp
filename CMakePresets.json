@@ -1,0 +1,100 @@
+{
+  "version": 5,
+  "cmakeMinimumRequired": { "major": 3, "minor": 24, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "installDir": "${sourceDir}/build/${presetName}/install",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+      "cacheVariables": {
+        "BINANCE_PRODUCTS": "all"
+      }
+    },
+    {
+      "name": "dev",
+      "displayName": "Debug + tests",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "BINANCE_BUILD_TESTS": "ON",
+        "BINANCE_BUILD_EXAMPLES": "ON",
+        "BINANCE_WARNINGS_AS_ERRORS": "ON",
+        "VCPKG_MANIFEST_FEATURES": "tests",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "asan",
+      "displayName": "Debug + tests + Address/UB sanitizers",
+      "inherits": "dev",
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "-O1 -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer"
+      }
+    },
+    {
+      "name": "tsan",
+      "displayName": "Debug + tests + Thread sanitizer",
+      "inherits": "dev",
+      "condition": { "type": "notEquals", "lhs": "${hostSystemName}", "rhs": "Windows" },
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "-O1 -fsanitize=thread -fno-omit-frame-pointer"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release, no tests",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BINANCE_BUILD_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "release-tests",
+      "displayName": "Release + tests",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BINANCE_BUILD_TESTS": "ON",
+        "BINANCE_WARNINGS_AS_ERRORS": "ON",
+        "VCPKG_MANIFEST_FEATURES": "tests"
+      }
+    },
+    {
+      "name": "ci",
+      "displayName": "CI: RelWithDebInfo + tests",
+      "inherits": "dev",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "dev", "configurePreset": "dev" },
+    { "name": "asan", "configurePreset": "asan" },
+    { "name": "tsan", "configurePreset": "tsan" },
+    { "name": "release", "configurePreset": "release" },
+    { "name": "release-tests", "configurePreset": "release-tests" },
+    { "name": "ci", "configurePreset": "ci" }
+  ],
+  "testPresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "output": { "outputOnFailure": true },
+      "execution": { "noTestsAction": "error", "jobs": 4 }
+    },
+    { "name": "dev", "inherits": "base", "configurePreset": "dev" },
+    { "name": "asan", "inherits": "base", "configurePreset": "asan" },
+    {
+      "name": "tsan", "inherits": "base", "configurePreset": "tsan",
+      "environment": { "TSAN_OPTIONS": "suppressions=${sourceDir}/common/tests/tsan.supp" }
+    },
+    { "name": "release-tests", "inherits": "base", "configurePreset": "release-tests" },
+    { "name": "ci", "inherits": "base", "configurePreset": "ci" }
+  ]
+}

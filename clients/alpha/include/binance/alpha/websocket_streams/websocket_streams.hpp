@@ -1,0 +1,341 @@
+//
+// Binance C++ Connector
+// https://github.com/binance/binance-connector-cpp
+//
+// Distributed under the MIT License. See the LICENCE file.
+// Documentation: https://binance.github.io/binance-connector-cpp/
+//
+
+#pragma once
+
+#include <chrono>
+#include <exception>
+#include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <boost/asio/append.hpp>
+#include <boost/asio/async_result.hpp>
+
+#include <binance/alpha/export.hpp>
+#include <binance/alpha/websocket_streams/api.hpp>
+#include <binance/alpha/websocket_streams/models.hpp>
+#include <binance/common/config.hpp>
+#include <binance/common/websocket_streams.hpp>
+
+namespace binance::alpha::websocket_streams {
+
+class WebsocketStreams;
+
+/// A connection to the Alpha WebSocket streams, returned connected by
+/// `WebsocketStreams::connect()`. Cheap to copy: copies share one `common::WebsocketStreams`
+/// (connection pool and executor), which reconnects, renews its connections and resubscribes
+/// until `disconnect()`.
+class BINANCE_ALPHA_EXPORT WebsocketStreamsConnection {
+public:
+    [[nodiscard]] const common::WebsocketStreamsConfig& configuration() const noexcept {
+        return client_->configuration();
+    }
+
+    void disconnect() { client_->disconnect(); }
+    template <class CompletionToken> auto async_disconnect(CompletionToken&& token) {
+        return client_->async_disconnect(std::forward<CompletionToken>(token));
+    }
+    [[nodiscard]] bool is_connected() const { return client_->is_connected(); }
+    /// Sends a ping frame on every open connection.
+    void ping_server() { client_->ping_server(); }
+    /// Registers a lifecycle callback (`common::WebsocketEvent`). Destroying the returned
+    /// subscription removes it.
+    template <class F> common::Subscription on_event(F&& callback) {
+        return client_->on_event(std::forward<F>(callback));
+    }
+
+    /// Subscribes to a stream by its name, for streams the SDK does not wrap yet, and returns a
+    /// handle for its callbacks (payloads as `boost::json::value`). Data arriving before the first
+    /// callback is added is kept for it (up to 1000 messages).
+    [[nodiscard]] common::WebsocketStreamHandle stream(std::string name,
+                                                       std::optional<common::StreamId> id = {},
+                                                       std::optional<std::string> url_path = {}) {
+        return client_->create_stream(std::move(name), std::move(id), std::move(url_path));
+    }
+
+    /// Subscribes to raw stream names. Messages are delivered to handles from `stream()`.
+    void subscribe(const std::vector<std::string>& streams, std::optional<common::StreamId> id = {},
+                   const std::optional<std::string>& url_path = {}) {
+        client_->subscribe(streams, std::move(id), url_path);
+    }
+    void unsubscribe(const std::vector<std::string>& streams,
+                     std::optional<common::StreamId> id = {},
+                     const std::optional<std::string>& url_path = {}) {
+        client_->unsubscribe(streams, std::move(id), url_path);
+    }
+    [[nodiscard]] bool is_subscribed(const std::string& stream) const {
+        return client_->is_subscribed(stream);
+    }
+    /// Completes once the server has acknowledged the subscription of `stream`; see
+    /// `common::WebsocketStreams::async_wait_subscribed`.
+    template <class CompletionToken>
+    auto async_wait_subscribed(std::string stream, std::optional<std::string> url_path,
+                               CompletionToken&& token) {
+        return client_->async_wait_subscribed(std::move(stream), std::move(url_path),
+                                              std::forward<CompletionToken>(token));
+    }
+    void wait_subscribed(std::string stream, std::optional<std::string> url_path = {},
+                         std::optional<std::chrono::milliseconds> timeout = {}) {
+        client_->wait_subscribed(std::move(stream), std::move(url_path), timeout);
+    }
+
+    // Api
+
+    /// Aggregate Trade Stream
+    ///
+    /// `<symbol>@aggTrade`.
+    ///
+    /// Pushes aggregate trade updates for a symbol.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#aggregate-trade-stream
+    [[nodiscard]] common::WebsocketStream<AggregateTradeStreamResponse>
+    aggregate_trade_stream(const AggregateTradeStreamParams& params) const {
+        return api_.aggregate_trade_stream(params);
+    }
+
+    /// All Book Ticker Stream
+    ///
+    /// `!bookTicker`.
+    ///
+    /// Pushes best bid/ask updates for all symbols.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-book-ticker-stream
+    [[nodiscard]] common::WebsocketStream<AllBookTickerStreamResponse>
+    all_book_ticker_stream(const AllBookTickerStreamParams& params = {}) const {
+        return api_.all_book_ticker_stream(params);
+    }
+
+    /// All Mini Ticker Stream
+    ///
+    /// `!miniTicker@arr`.
+    ///
+    /// Pushes mini ticker statistics for all symbols.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-mini-ticker-stream
+    [[nodiscard]] common::WebsocketStream<AllMiniTickerStreamResponse>
+    all_mini_ticker_stream(const AllMiniTickerStreamParams& params = {}) const {
+        return api_.all_mini_ticker_stream(params);
+    }
+
+    /// All Ticker Stream
+    ///
+    /// `!ticker@arr`.
+    ///
+    /// Pushes full ticker statistics for all symbols.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-ticker-stream
+    [[nodiscard]] common::WebsocketStream<AllTickerStreamResponse>
+    all_ticker_stream(const AllTickerStreamParams& params = {}) const {
+        return api_.all_ticker_stream(params);
+    }
+
+    /// All Tokens 24h Ticker Stream
+    ///
+    /// `came@allTokens@ticker24`.
+    ///
+    /// Pushes 24h ticker-like metrics for all tokens.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#all-tokens24h-ticker-stream
+    [[nodiscard]] common::WebsocketStream<AllTokens24hTickerStreamResponse>
+    all_tokens24h_ticker_stream(const AllTokens24hTickerStreamParams& params = {}) const {
+        return api_.all_tokens24h_ticker_stream(params);
+    }
+
+    /// Book Ticker Stream
+    ///
+    /// `<symbol>@bookTicker`.
+    ///
+    /// Pushes best bid/ask updates for a symbol.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#book-ticker-stream
+    [[nodiscard]] common::WebsocketStream<BookTickerStreamResponse>
+    book_ticker_stream(const BookTickerStreamParams& params) const {
+        return api_.book_ticker_stream(params);
+    }
+
+    /// Contract Kline Stream
+    ///
+    /// `came@<contractAddress>@<chainId>@kline_<interval>`.
+    ///
+    /// Pushes kline updates by contractAddress@chainId.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#contract-kline-stream
+    [[nodiscard]] common::WebsocketStream<ContractKlineStreamResponse>
+    contract_kline_stream(const ContractKlineStreamParams& params) const {
+        return api_.contract_kline_stream(params);
+    }
+
+    /// Full Depth Stream
+    ///
+    /// `<symbol>@fulldepth@<interval>`.
+    ///
+    /// Returns all available depth, including UI and API orders.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#full-depth-stream
+    [[nodiscard]] common::WebsocketStream<FullDepthStreamResponse>
+    full_depth_stream(const FullDepthStreamParams& params) const {
+        return api_.full_depth_stream(params);
+    }
+
+    /// Kline Stream
+    ///
+    /// `<symbol>@kline_<interval>`.
+    ///
+    /// Pushes kline updates for a symbol.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#kline-stream
+    [[nodiscard]] common::WebsocketStream<KlineStreamResponse>
+    kline_stream(const KlineStreamParams& params) const {
+        return api_.kline_stream(params);
+    }
+
+    /// Mini Ticker Stream
+    ///
+    /// `<symbol>@miniTicker`.
+    ///
+    /// Pushes 24h rolling mini ticker statistics.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#mini-ticker-stream
+    [[nodiscard]] common::WebsocketStream<MiniTickerStreamResponse>
+    mini_ticker_stream(const MiniTickerStreamParams& params) const {
+        return api_.mini_ticker_stream(params);
+    }
+
+    /// Partial Depth Stream
+    ///
+    /// `<symbol>@depth<levels>@<interval>`.
+    ///
+    /// Pushes partial depth updates (UI orders only).
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#partial-depth-stream
+    [[nodiscard]] common::WebsocketStream<PartialDepthStreamResponse>
+    partial_depth_stream(const PartialDepthStreamParams& params) const {
+        return api_.partial_depth_stream(params);
+    }
+
+    /// Ticker Stream
+    ///
+    /// `<symbol>@ticker`.
+    ///
+    /// Pushes full 24h rolling ticker statistics.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#ticker-stream
+    [[nodiscard]] common::WebsocketStream<TickerStreamResponse>
+    ticker_stream(const TickerStreamParams& params) const {
+        return api_.ticker_stream(params);
+    }
+
+    /// Trade Stream
+    ///
+    /// `<symbol>@trade`.
+    ///
+    /// Pushes raw trade updates for a symbol.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/advanced-trading-alpha-trading/api/ws-streams/~#trade-stream
+    [[nodiscard]] common::WebsocketStream<TradeStreamResponse>
+    trade_stream(const TradeStreamParams& params) const {
+        return api_.trade_stream(params);
+    }
+
+private:
+    friend class WebsocketStreams;
+
+    /// Not connected yet: `WebsocketStreams::connect()` creates and connects one. Throws
+    /// `common::ConfigError` if the configuration is invalid.
+    explicit WebsocketStreamsConnection(common::WebsocketStreamsConfig configuration);
+
+    [[nodiscard]] const std::shared_ptr<common::WebsocketStreams>& client() const noexcept {
+        return client_;
+    }
+
+    std::shared_ptr<common::WebsocketStreams> client_;
+    Api api_;
+};
+
+/// Alpha WebSocket streams client: holds the configuration, and `connect()` opens a new
+/// connection with it, like the `connect()` of the other Binance connectors. Every call returns an
+/// independent connection.
+class BINANCE_ALPHA_EXPORT WebsocketStreams {
+public:
+    explicit WebsocketStreams(common::WebsocketStreamsConfig configuration);
+
+    /// A client for `config.url`, production when it is not set.
+    [[nodiscard]] static WebsocketStreams from_config(common::WebsocketStreamsConfig config);
+    /// A client for production (Alpha WebSocket streams).
+    [[nodiscard]] static WebsocketStreams production(common::WebsocketStreamsConfig config);
+
+    [[nodiscard]] const common::WebsocketStreamsConfig& configuration() const noexcept {
+        return configuration_;
+    }
+
+    /// Opens a connection (a pool of them with `mode`, overriding the configuration), subscribed to
+    /// `streams` (raw stream names), and returns it once connected. Throws `common::ConfigError` if
+    /// the configuration is invalid, and the error of the first connection that fails to open.
+    [[nodiscard]] WebsocketStreamsConnection
+    connect(std::vector<std::string> streams = {},
+            std::optional<common::WebsocketMode> mode = {}) const {
+        WebsocketStreamsConnection connection(configuration_for(mode));
+        connection.client()->connect(std::move(streams));
+        return connection;
+    }
+
+    /// Asynchronous `connect()`, completing with `void(std::exception_ptr,
+    /// WebsocketStreamsConnection)`.
+    template <class CompletionToken> auto async_connect(CompletionToken&& token) const {
+        return async_connect({}, std::nullopt, std::forward<CompletionToken>(token));
+    }
+    template <class CompletionToken>
+    auto async_connect(std::vector<std::string> streams, CompletionToken&& token) const {
+        return async_connect(std::move(streams), std::nullopt,
+                             std::forward<CompletionToken>(token));
+    }
+    template <class CompletionToken>
+    auto async_connect(std::vector<std::string> streams, std::optional<common::WebsocketMode> mode,
+                       CompletionToken&& token) const {
+        return boost::asio::async_initiate<CompletionToken,
+                                           void(std::exception_ptr, WebsocketStreamsConnection)>(
+            [](auto handler, WebsocketStreamsConnection connection,
+               std::vector<std::string> initial) {
+                const auto client = connection.client();
+                client->async_connect(
+                    std::move(initial),
+                    boost::asio::append(std::move(handler), std::move(connection)));
+            },
+            token, WebsocketStreamsConnection(configuration_for(mode)), std::move(streams));
+    }
+
+private:
+    [[nodiscard]] common::WebsocketStreamsConfig
+    configuration_for(std::optional<common::WebsocketMode> mode) const {
+        auto configuration = configuration_;
+        if (mode) {
+            configuration.mode = *mode;
+        }
+        return configuration;
+    }
+
+    common::WebsocketStreamsConfig configuration_;
+};
+
+} // namespace binance::alpha::websocket_streams
