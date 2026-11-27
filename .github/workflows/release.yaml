@@ -341,3 +341,93 @@ jobs:
           fi
           
           gh release upload "$TAG" dist/binance_c-*.zip dist/SHA256SUMS --clobber --repo "$GITHUB_REPOSITORY"
+
+  vcpkg:
+    name: update the vcpkg registry
+    needs: release
+    if: ${{ vars.VCPKG_FORK != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      VCPKG_FORK: ${{ vars.VCPKG_FORK }}
+      GH_TOKEN: ${{ secrets.VCPKG_PR_TOKEN }}
+      PORT: binance-connector-cpp
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          sparse-checkout: ports
+
+      - name: Open the pull request
+        run: |
+          set -euo pipefail
+          version="${TAG#v}"
+          branch="$PORT-$version"
+          title="[$PORT] update to $version"
+
+          existing=$(gh pr list --repo microsoft/vcpkg --state all --search "\"$title\" in:title" --json number --jq 'length')
+          if [ "$existing" != "0" ]; then
+            echo "::notice::microsoft/vcpkg already has a pull request named '$title'"
+            exit 0
+          fi
+
+          # The fork has to have everything of the registry but the new commit, which is then all that is pushed.
+          gh repo sync "$VCPKG_FORK" --source microsoft/vcpkg --branch master
+          git clone --quiet --filter=blob:none https://github.com/microsoft/vcpkg.git registry
+          cd registry
+
+          current=$(jq -r '."version-semver" // empty' "ports/$PORT/vcpkg.json" 2>/dev/null || true)
+          if [ -z "$current" ]; then
+            echo "::notice::$PORT is not in the vcpkg registry yet: nothing to update"
+            exit 0
+          fi
+          if [ "$(printf '%s\n%s\n' "$current" "$version" | sort -V | tail -n 1)" = "$current" ]; then
+            echo "::notice::The vcpkg registry has $PORT $current, which is not older than $version"
+            exit 0
+          fi
+
+          git checkout --quiet -b "$branch"
+          sha=$(curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$TAG.tar.gz" | sha512sum | cut -d ' ' -f 1)
+          sed -i -E "s/^( *SHA512 ).*/\1$sha/" "ports/$PORT/portfile.cmake"
+          grep -q "SHA512 $sha" "ports/$PORT/portfile.cmake"
+          python3 - "$version" "../ports/$PORT/vcpkg.json" "ports/$PORT/vcpkg.json" <<'PY'
+          import json, sys
+
+          version, ours_path, theirs_path = sys.argv[1:]
+          ours = json.load(open(ours_path))
+          theirs = json.load(open(theirs_path))
+          theirs["version-semver"] = version
+          theirs.pop("port-version", None)
+          for key in ("dependencies", "features", "default-features"):
+              if key in ours:
+                  theirs[key] = ours[key]
+              else:
+                  theirs.pop(key, None)
+          with open(theirs_path, "w") as f:
+              json.dump(theirs, f, indent=2, ensure_ascii=False)
+              f.write("\n")
+          PY
+          cp "../ports/$PORT/usage" "ports/$PORT/usage"
+
+          ./bootstrap-vcpkg.sh -disableMetrics
+          ./vcpkg format-manifest "ports/$PORT/vcpkg.json"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "ports/$PORT"
+          git commit --quiet -m "$title"
+          ./vcpkg x-add-version "$PORT"
+          git add versions
+          git commit --quiet --amend --no-edit
+          git push --force --quiet "https://x-access-token:${GH_TOKEN}@github.com/${VCPKG_FORK}.git" "HEAD:refs/heads/$branch"
+
+          gh pr create --repo microsoft/vcpkg --base master --head "${VCPKG_FORK%%/*}:$branch" --title "$title" \
+            --body "Updates \`$PORT\` to [$TAG](https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG).
+
+          - [x] Changes comply with the [maintainer guide](https://github.com/microsoft/vcpkg-docs/blob/main/vcpkg/contributing/maintainer-guide.md).
+          - [x] SHA512s are updated for each updated download.
+          - [x] The \"supports\" clause reflects platforms that may be fixed by this new version.
+          - [x] Any fixed [CI baseline](https://github.com/microsoft/vcpkg/blob/master/scripts/ci.baseline.txt) entries are removed from that file.
+          - [x] Any patches that are no longer applied are deleted from the port's directory.
+          - [x] The version database is fixed by rerunning \`./vcpkg x-add-version --all\` and committing the result.
+          - [x] Only one version is added to each modified port's versions file."
