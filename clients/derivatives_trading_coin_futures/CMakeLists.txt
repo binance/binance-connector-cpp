@@ -10,6 +10,8 @@ binance_add_product(derivatives_trading_coin_futures
         src/rest_api/models/all_orders_response_inner.cpp
         src/rest_api/models/auto_cancel_all_open_orders_response.cpp
         src/rest_api/models/basis_response_inner.cpp
+        src/rest_api/models/cancel_algo_order_response.cpp
+        src/rest_api/models/cancel_all_algo_open_orders_response.cpp
         src/rest_api/models/cancel_all_open_orders_response.cpp
         src/rest_api/models/cancel_multiple_orders_response_inner.cpp
         src/rest_api/models/cancel_order_response.cpp
@@ -19,6 +21,7 @@ binance_add_product(derivatives_trading_coin_futures
         src/rest_api/models/check_server_time_response.cpp
         src/rest_api/models/compressed_aggregate_trades_list_response_inner.cpp
         src/rest_api/models/continuous_contract_kline_candlestick_data_item_inner.cpp
+        src/rest_api/models/current_all_algo_open_orders_response_inner.cpp
         src/rest_api/models/current_all_open_orders_response_inner.cpp
         src/rest_api/models/exchange_information_response.cpp
         src/rest_api/models/exchange_information_response_rate_limits_inner.cpp
@@ -48,6 +51,7 @@ binance_add_product(derivatives_trading_coin_futures
         src/rest_api/models/modify_multiple_orders_batch_orders_parameter_inner.cpp
         src/rest_api/models/modify_multiple_orders_response_inner.cpp
         src/rest_api/models/modify_order_response.cpp
+        src/rest_api/models/new_algo_order_response.cpp
         src/rest_api/models/new_order_response.cpp
         src/rest_api/models/notional_bracket_for_pair_response_inner.cpp
         src/rest_api/models/notional_bracket_for_pair_response_inner_brackets_inner.cpp
@@ -62,6 +66,8 @@ binance_add_product(derivatives_trading_coin_futures
         src/rest_api/models/position_adl_quantile_estimation_response_inner_adl_quantile.cpp
         src/rest_api/models/position_information_response_inner.cpp
         src/rest_api/models/premium_index_kline_data_item_inner.cpp
+        src/rest_api/models/query_algo_order_response.cpp
+        src/rest_api/models/query_all_algo_orders_response_inner.cpp
         src/rest_api/models/query_current_open_order_response.cpp
         src/rest_api/models/query_index_price_constituents_response.cpp
         src/rest_api/models/query_index_price_constituents_response_constituents_inner.cpp
@@ -85,6 +91,9 @@ binance_add_product(derivatives_trading_coin_futures
         src/websocket_api/models/account_information_response_result.cpp
         src/websocket_api/models/account_information_response_result_assets_inner.cpp
         src/websocket_api/models/account_information_response_result_positions_inner.cpp
+        src/websocket_api/models/cancel_algo_order_response.cpp
+        src/websocket_api/models/cancel_algo_order_response_rate_limits_inner.cpp
+        src/websocket_api/models/cancel_algo_order_response_result.cpp
         src/websocket_api/models/cancel_order_response.cpp
         src/websocket_api/models/cancel_order_response_rate_limits_inner.cpp
         src/websocket_api/models/cancel_order_response_result.cpp
@@ -96,6 +105,9 @@ binance_add_product(derivatives_trading_coin_futures
         src/websocket_api/models/keepalive_user_data_stream_response_result.cpp
         src/websocket_api/models/modify_order_response.cpp
         src/websocket_api/models/modify_order_response_result.cpp
+        src/websocket_api/models/new_algo_order_response.cpp
+        src/websocket_api/models/new_algo_order_response_rate_limits_inner.cpp
+        src/websocket_api/models/new_algo_order_response_result.cpp
         src/websocket_api/models/new_order_response.cpp
         src/websocket_api/models/new_order_response_result.cpp
         src/websocket_api/models/position_information_response.cpp
@@ -115,11 +127,15 @@ binance_add_product(derivatives_trading_coin_futures
         src/websocket_streams/models/account_update_ab_inner.cpp
         src/websocket_streams/models/account_update_ap_inner.cpp
         src/websocket_streams/models/aggregate_trade_streams_response.cpp
+        src/websocket_streams/models/algo_update.cpp
+        src/websocket_streams/models/algo_update_o.cpp
         src/websocket_streams/models/all_book_tickers_stream_response.cpp
         src/websocket_streams/models/all_market_liquidation_order_streams_response.cpp
         src/websocket_streams/models/all_market_liquidation_order_streams_response_o.cpp
         src/websocket_streams/models/all_market_mini_tickers_stream_response_inner.cpp
         src/websocket_streams/models/all_market_tickers_streams_response_inner.cpp
+        src/websocket_streams/models/conditional_order_trigger_reject.cpp
+        src/websocket_streams/models/conditional_order_trigger_reject_or.cpp
         src/websocket_streams/models/continuous_contract_kline_candlestick_streams_response.cpp
         src/websocket_streams/models/continuous_contract_kline_candlestick_streams_response_k.cpp
         src/websocket_streams/models/contract_info_stream_response.cpp

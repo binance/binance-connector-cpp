@@ -16,6 +16,8 @@
 #include <binance/derivatives_trading_coin_futures/export.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_streams/models/account_config_update.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_streams/models/account_update.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/algo_update.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_streams/models/conditional_order_trigger_reject.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_streams/models/grid_update.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_streams/models/listen_key_expired.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_streams/models/margin_call.hpp>
@@ -26,8 +28,9 @@ namespace binance::derivatives_trading_coin_futures::websocket_streams {
 
 struct UserDataStreamEventsResponse {
     /// One of the alternatives, or the raw JSON when none matches.
-    std::variant<AccountConfigUpdate, AccountUpdate, GridUpdate, ListenKeyExpired, MarginCall,
-                 OrderTradeUpdate, StrategyUpdate, boost::json::value>
+    std::variant<AccountConfigUpdate, AccountUpdate, AlgoUpdate, ConditionalOrderTriggerReject,
+                 GridUpdate, ListenKeyExpired, MarginCall, OrderTradeUpdate, StrategyUpdate,
+                 boost::json::value>
         value;
 
     bool operator==(const UserDataStreamEventsResponse& /*other*/) const = default;

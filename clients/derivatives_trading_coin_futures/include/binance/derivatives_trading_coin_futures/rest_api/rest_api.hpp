@@ -1313,6 +1313,151 @@ public:
                                                             std::forward<CompletionToken>(token));
     }
 
+    /// Cancel Algo Order (TRADE)
+    ///
+    /// DELETE /dapi/v1/algoOrder.
+    ///
+    /// Cancel an active algo (conditional) order, including TP/SL (Take Profit / Stop Loss) and
+    /// trailing stop orders on COIN-M Futures.
+    ///
+    /// Weight(IP): 1
+    ///
+    /// Security Type: TRADE
+    ///
+    /// Notes:
+    /// - Either `algoId` or `clientAlgoId` must be sent.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#cancel-algo-order
+    [[nodiscard]] common::RestApiResponse<CancelAlgoOrderResponse>
+    cancel_algo_order(const CancelAlgoOrderParams& params = {}) const {
+        return trade_api_.cancel_algo_order(params);
+    }
+    /// Asynchronous `cancel_algo_order()`.
+    template <class CompletionToken>
+    auto async_cancel_algo_order(const CancelAlgoOrderParams& params,
+                                 CompletionToken&& token) const {
+        return trade_api_.async_cancel_algo_order(params, std::forward<CompletionToken>(token));
+    }
+
+    /// New Algo Order (TRADE)
+    ///
+    /// POST /dapi/v1/algoOrder.
+    ///
+    /// Send in a new algo (conditional) order. Use this endpoint to place **TP/SL (Take Profit /
+    /// Stop Loss)** and trailing stop orders on COIN-M Futures. Supported order types under
+    /// `algoType=CONDITIONAL` are `STOP_MARKET`, `TAKE_PROFIT_MARKET`, `STOP`, `TAKE_PROFIT`, and
+    /// `TRAILING_STOP_MARKET`.
+    ///
+    /// Weight: 1 on 10s order rate limit(X-MBX-ORDER-COUNT-10S);
+    /// 1 on 1min order rate limit(X-MBX-ORDER-COUNT-1M);
+    /// 0 on IP rate limit(x-mbx-used-weight-1m)
+    ///
+    /// Security Type: TRADE
+    ///
+    /// Notes:
+    /// - Algo order with type `STOP`, parameter `timeInForce` can be sent (default `GTC`).
+    /// - Algo order with type `TAKE_PROFIT`, parameter `timeInForce` can be sent ( default `GTC`).
+    /// - Condition orders will be triggered when:
+    ///   - If parameter`priceProtect`is sent as true:
+    ///     - when price reaches the `triggerPrice` ，the difference rate between "MARK_PRICE" and
+    ///     "CONTRACT_PRICE" cannot be larger than the "triggerProtect" of the symbol
+    ///     - "triggerProtect" of a symbol can be got from `GET /dapi/v1/exchangeInfo`
+    ///   - `STOP`, `STOP_MARKET`:
+    ///     - BUY: latest price ("MARK_PRICE" or "CONTRACT_PRICE") >= `triggerPrice`
+    ///     - SELL: latest price ("MARK_PRICE" or "CONTRACT_PRICE") <= `triggerPrice`
+    ///   - `TAKE_PROFIT`, `TAKE_PROFIT_MARKET`:
+    ///     - BUY: latest price ("MARK_PRICE" or "CONTRACT_PRICE") <= `triggerPrice`
+    ///     - SELL: latest price ("MARK_PRICE" or "CONTRACT_PRICE") >= `triggerPrice`
+    ///   - `TRAILING_STOP_MARKET`:
+    ///     - BUY: the lowest price after order placed <= `activatePrice`, and the latest price >=
+    ///     the lowest price * (1 + `callbackRate`)
+    ///     - SELL: the highest price after order placed >= `activatePrice`, and the latest price <=
+    ///     the highest price * (1 - `callbackRate`)
+    /// - For `TRAILING_STOP_MARKET`, if you got such error code. > `{"code": -2021, "msg": "Order
+    /// would immediately trigger."}` > means that the parameters you send do not meet the following
+    /// requirements:
+    ///   - BUY: `activatePrice` should be smaller than latest price.
+    ///   - SELL: `activatePrice` should be larger than latest price.
+    /// - `STOP_MARKET`, `TAKE_PROFIT_MARKET` with `closePosition`=`true`:
+    ///   - Follow the same rules for condition orders.
+    ///   - If triggered，**close all** current long position( if `SELL`) or current short position(
+    ///   if `BUY`).
+    ///   - Cannot be used with `quantity` parameter
+    ///   - Cannot be used with `reduceOnly` parameter
+    ///   - In Hedge Mode,cannot be used with `BUY` orders in `LONG` position side. and cannot be
+    ///   used with `SELL` orders in `SHORT` position side
+    /// - `selfTradePreventionMode` is only effective when `timeInForce` set to `IOC` or `GTC`.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#new-algo-order
+    [[nodiscard]] common::RestApiResponse<NewAlgoOrderResponse>
+    new_algo_order(const NewAlgoOrderParams& params) const {
+        return trade_api_.new_algo_order(params);
+    }
+    /// Asynchronous `new_algo_order()`.
+    template <class CompletionToken>
+    auto async_new_algo_order(const NewAlgoOrderParams& params, CompletionToken&& token) const {
+        return trade_api_.async_new_algo_order(params, std::forward<CompletionToken>(token));
+    }
+
+    /// Query Algo Order (USER_DATA)
+    ///
+    /// GET /dapi/v1/algoOrder.
+    ///
+    /// Check the status of an algo (conditional) order, such as TP/SL (Take Profit / Stop Loss) or
+    /// trailing stop orders on COIN-M Futures.
+    ///
+    /// * These orders will not be found:
+    ///   * order status is `CANCELED` or `EXPIRED` **AND** order has NO filled trade **AND**
+    ///   created time + 3 days < current time
+    ///   * order create time + 90 days < current time
+    ///
+    /// Weight(IP): 1
+    ///
+    /// Security Type: USER_DATA
+    ///
+    /// Notes:
+    /// - Either `algoId` or `clientAlgoId` must be sent.
+    /// - `algoId` is self-increment for each specific `symbol`
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#query-algo-order
+    [[nodiscard]] common::RestApiResponse<QueryAlgoOrderResponse>
+    query_algo_order(const QueryAlgoOrderParams& params = {}) const {
+        return trade_api_.query_algo_order(params);
+    }
+    /// Asynchronous `query_algo_order()`.
+    template <class CompletionToken>
+    auto async_query_algo_order(const QueryAlgoOrderParams& params, CompletionToken&& token) const {
+        return trade_api_.async_query_algo_order(params, std::forward<CompletionToken>(token));
+    }
+
+    /// Cancel All Algo Open Orders (TRADE)
+    ///
+    /// DELETE /dapi/v1/algoOpenOrders.
+    ///
+    /// Cancel all open algo (conditional) orders on a symbol, including TP/SL (Take Profit / Stop
+    /// Loss) and trailing stop orders on COIN-M Futures.
+    ///
+    /// Weight(IP): 1
+    ///
+    /// Security Type: TRADE
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#cancel-all-algo-open-orders
+    [[nodiscard]] common::RestApiResponse<CancelAllAlgoOpenOrdersResponse>
+    cancel_all_algo_open_orders(const CancelAllAlgoOpenOrdersParams& params) const {
+        return trade_api_.cancel_all_algo_open_orders(params);
+    }
+    /// Asynchronous `cancel_all_algo_open_orders()`.
+    template <class CompletionToken>
+    auto async_cancel_all_algo_open_orders(const CancelAllAlgoOpenOrdersParams& params,
+                                           CompletionToken&& token) const {
+        return trade_api_.async_cancel_all_algo_open_orders(params,
+                                                            std::forward<CompletionToken>(token));
+    }
+
     /// Cancel All Open Orders (TRADE)
     ///
     /// DELETE /dapi/v1/allOpenOrders.
@@ -1668,6 +1813,36 @@ public:
         return trade_api_.async_change_position_mode(params, std::forward<CompletionToken>(token));
     }
 
+    /// Current All Algo Open Orders (USER_DATA)
+    ///
+    /// GET /dapi/v1/openAlgoOrders.
+    ///
+    /// Get all open algo (conditional) orders on a symbol, including TP/SL (Take Profit / Stop
+    /// Loss) and trailing stop orders on COIN-M Futures.
+    ///
+    /// Weight: **1** for a single symbol; **40** when the symbol parameter is omitted
+    ///
+    /// **Careful** when accessing this with no symbol.
+    ///
+    /// Security Type: USER_DATA
+    ///
+    /// Notes:
+    /// - If the symbol is not sent, orders for all symbols will be returned in an array.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#current-all-algo-open-orders
+    [[nodiscard]] common::RestApiResponse<std::vector<CurrentAllAlgoOpenOrdersResponseInner>>
+    current_all_algo_open_orders(const CurrentAllAlgoOpenOrdersParams& params = {}) const {
+        return trade_api_.current_all_algo_open_orders(params);
+    }
+    /// Asynchronous `current_all_algo_open_orders()`.
+    template <class CompletionToken>
+    auto async_current_all_algo_open_orders(const CurrentAllAlgoOpenOrdersParams& params,
+                                            CompletionToken&& token) const {
+        return trade_api_.async_current_all_algo_open_orders(params,
+                                                             std::forward<CompletionToken>(token));
+    }
+
     /// Current All Open Orders (USER_DATA)
     ///
     /// GET /dapi/v1/openOrders.
@@ -1840,6 +2015,40 @@ public:
     auto async_position_information(const PositionInformationParams& params,
                                     CompletionToken&& token) const {
         return trade_api_.async_position_information(params, std::forward<CompletionToken>(token));
+    }
+
+    /// Query All Algo Orders (USER_DATA)
+    ///
+    /// GET /dapi/v1/allAlgoOrders.
+    ///
+    /// Get all algo (conditional) orders — active, CANCELED, TRIGGERED, or FINISHED — including
+    /// TP/SL (Take Profit / Stop Loss) and trailing stop orders on COIN-M Futures.
+    ///
+    /// * These orders will not be found:
+    ///   * order status is `CANCELED` or `EXPIRED` **AND** order has NO filled trade **AND**
+    ///   created time + 3 days < current time
+    ///   * order create time + 90 days < current time
+    ///
+    /// Weight(IP): 5
+    ///
+    /// Security Type: USER_DATA
+    ///
+    /// Notes:
+    /// - If `algoId` is set, it will get orders >= that `algoId`. Otherwise most recent orders are
+    /// returned.
+    /// - The query time period must be less than 7 days( default as the recent 7 days).
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#query-all-algo-orders
+    [[nodiscard]] common::RestApiResponse<std::vector<QueryAllAlgoOrdersResponseInner>>
+    query_all_algo_orders(const QueryAllAlgoOrdersParams& params) const {
+        return trade_api_.query_all_algo_orders(params);
+    }
+    /// Asynchronous `query_all_algo_orders()`.
+    template <class CompletionToken>
+    auto async_query_all_algo_orders(const QueryAllAlgoOrdersParams& params,
+                                     CompletionToken&& token) const {
+        return trade_api_.async_query_all_algo_orders(params, std::forward<CompletionToken>(token));
     }
 
     /// Query Current Open Order (USER_DATA)

@@ -62,6 +62,49 @@ boost::json::object first_request(const MockWsServer& server) {
 
 } // namespace
 
+TEST(WebsocketApiTradeApi, CancelAlgoOrder) {
+    MockWsServer server(reply(
+        R"json({"id":"unique-cancel-request-id-5678","status":200,"result":{"algoId":2000000002162519,"clientAlgoId":"rDMG8WSde6LkyMNtk6s825","code":"200","msg":"success"},"rateLimits":[{"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":2400,"count":6}]})json"));
+    const auto api = api_for(server);
+    const CancelAlgoOrderParams params{};
+    const auto res = api.cancel_algo_order(params);
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto req = first_request(server);
+    EXPECT_EQ(req.at("method").as_string(), "algoOrder.cancel");
+    EXPECT_TRUE(req.at("params").as_object().contains("signature"));
+}
+
+TEST(WebsocketApiTradeApi, CancelAlgoOrderWithOptionalParams) {
+    MockWsServer server(reply(
+        R"json({"id":"unique-cancel-request-id-5678","status":200,"result":{"algoId":2000000002162519,"clientAlgoId":"rDMG8WSde6LkyMNtk6s825","code":"200","msg":"success"},"rateLimits":[{"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":2400,"count":6}]})json"));
+    const auto api = api_for(server);
+    const CancelAlgoOrderParams params{
+        .id = "e9d6b4349871b40611412680b3445fac",
+        .algo_id = 2000000002162519,
+        .client_algo_id = "rDMG8WSde6LkyMNtk6s825",
+        .recv_window = 5000,
+    };
+    const auto res = api.cancel_algo_order(params);
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto req = first_request(server);
+    EXPECT_EQ(req.at("method").as_string(), "algoOrder.cancel");
+    [[maybe_unused]] const auto& sent = req.at("params").as_object();
+
+    EXPECT_TRUE(sent.contains("algoId"));
+    EXPECT_TRUE(sent.contains("clientAlgoId"));
+    EXPECT_TRUE(sent.contains("recvWindow"));
+    EXPECT_TRUE(sent.contains("signature"));
+}
+
+TEST(WebsocketApiTradeApi, CancelAlgoOrderErrorResponse) {
+    MockWsServer server(reply({}, 400));
+    const auto api = api_for(server);
+    const CancelAlgoOrderParams params{};
+    EXPECT_THROW((void)api.cancel_algo_order(params), common::WebsocketResponseError);
+}
+
 TEST(WebsocketApiTradeApi, CancelOrder) {
     MockWsServer server(reply(
         R"json({"id":"a8627ea5-8b9f-452f-90ae-4136f2b442e2","status":200,"result":{"orderId":333245211,"symbol":"BTCUSD_PERP","pair":"BTCUSD","status":"CANCELED","clientOrderId":"5SztZiGFAxgAqw4J9EN9fA","price":"51000","origQty":"1","executedQty":"0","cumQty":"0","timeInForce":"GTC","type":"LIMIT","reduceOnly":false,"closePosition":false,"side":"BUY","positionSide":"BOTH","stopPrice":"0","workingType":"CONTRACT_PRICE","priceProtect":false,"origType":"LIMIT","updateTime":1728416138285},"rateLimits":[{"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":2400,"count":6}]})json"));
@@ -166,6 +209,89 @@ TEST(WebsocketApiTradeApi, ModifyOrderErrorResponse) {
                                    .quantity = common::Decimal("1.0"),
                                    .price = common::Decimal("1.0")};
     EXPECT_THROW((void)api.modify_order(params), common::WebsocketResponseError);
+}
+
+TEST(WebsocketApiTradeApi, NewAlgoOrder) {
+    MockWsServer server(reply(
+        R"json({"id":"06c9dbd8-ccbf-4ecf-a29c-fe31495ac73f","status":200,"result":{"algoId":3000000000003505,"clientAlgoId":"0Xkl1p621E4EryvufmYre1","algoType":"CONDITIONAL","orderType":"TAKE_PROFIT","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"SHORT","timeInForce":"GTC","quantity":"1.000","algoStatus":"NEW","triggerPrice":"120000.00","price":"160000.00","icebergQuantity":"null","selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,"createTime":1762507264142,"updateTime":1762507264143,"triggerTime":0,"goodTillDate":0},"rateLimits":[{"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":2400,"count":1}]})json"));
+    const auto api = api_for(server);
+    const NewAlgoOrderParams params{.algo_type = NewAlgoOrderAlgoTypeEnum::Conditional,
+                                    .symbol = "BTCUSD_PERP",
+                                    .side = NewAlgoOrderSideEnum::Buy,
+                                    .type = NewAlgoOrderTypeEnum::StopMarket};
+    const auto res = api.new_algo_order(params);
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto req = first_request(server);
+    EXPECT_EQ(req.at("method").as_string(), "algoOrder.place");
+    EXPECT_TRUE(req.at("params").as_object().contains("signature"));
+}
+
+TEST(WebsocketApiTradeApi, NewAlgoOrderWithOptionalParams) {
+    MockWsServer server(reply(
+        R"json({"id":"06c9dbd8-ccbf-4ecf-a29c-fe31495ac73f","status":200,"result":{"algoId":3000000000003505,"clientAlgoId":"0Xkl1p621E4EryvufmYre1","algoType":"CONDITIONAL","orderType":"TAKE_PROFIT","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"SHORT","timeInForce":"GTC","quantity":"1.000","algoStatus":"NEW","triggerPrice":"120000.00","price":"160000.00","icebergQuantity":"null","selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,"createTime":1762507264142,"updateTime":1762507264143,"triggerTime":0,"goodTillDate":0},"rateLimits":[{"rateLimitType":"REQUEST_WEIGHT","interval":"MINUTE","intervalNum":1,"limit":2400,"count":1}]})json"));
+    const auto api = api_for(server);
+    const NewAlgoOrderParams params{
+        .algo_type = NewAlgoOrderAlgoTypeEnum::Conditional,
+        .symbol = "BTCUSD_PERP",
+        .side = NewAlgoOrderSideEnum::Buy,
+        .type = NewAlgoOrderTypeEnum::StopMarket,
+        .id = "e9d6b4349871b40611412680b3445fac",
+        .position_side = NewAlgoOrderPositionSideEnum::Both,
+        .time_in_force = NewAlgoOrderTimeInForceEnum::Ioc,
+        .quantity = common::Decimal("1.0"),
+        .price = common::Decimal("1.0"),
+        .trigger_price = common::Decimal("1.0"),
+        .working_type = NewAlgoOrderWorkingTypeEnum::MarkPrice,
+        .price_match = NewAlgoOrderPriceMatchEnum::Opponent,
+        .close_position = NewAlgoOrderClosePositionEnum::True_,
+        .price_protect = NewAlgoOrderPriceProtectEnum::True_,
+        .reduce_only = NewAlgoOrderReduceOnlyEnum::True_,
+        .activate_price = common::Decimal("1.0"),
+        .callback_rate = common::Decimal("1"),
+        .client_algo_id = "1",
+        .new_order_resp_type = NewAlgoOrderNewOrderRespTypeEnum::Ack,
+        .self_trade_prevention_mode = NewAlgoOrderSelfTradePreventionModeEnum::None_,
+        .recv_window = 5000,
+    };
+    const auto res = api.new_algo_order(params);
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto req = first_request(server);
+    EXPECT_EQ(req.at("method").as_string(), "algoOrder.place");
+    [[maybe_unused]] const auto& sent = req.at("params").as_object();
+    EXPECT_TRUE(sent.contains("algoType"));
+    EXPECT_TRUE(sent.contains("symbol"));
+    EXPECT_TRUE(sent.contains("side"));
+    EXPECT_TRUE(sent.contains("type"));
+
+    EXPECT_TRUE(sent.contains("positionSide"));
+    EXPECT_TRUE(sent.contains("timeInForce"));
+    EXPECT_TRUE(sent.contains("quantity"));
+    EXPECT_TRUE(sent.contains("price"));
+    EXPECT_TRUE(sent.contains("triggerPrice"));
+    EXPECT_TRUE(sent.contains("workingType"));
+    EXPECT_TRUE(sent.contains("priceMatch"));
+    EXPECT_TRUE(sent.contains("closePosition"));
+    EXPECT_TRUE(sent.contains("priceProtect"));
+    EXPECT_TRUE(sent.contains("reduceOnly"));
+    EXPECT_TRUE(sent.contains("activatePrice"));
+    EXPECT_TRUE(sent.contains("callbackRate"));
+    EXPECT_TRUE(sent.contains("clientAlgoId"));
+    EXPECT_TRUE(sent.contains("newOrderRespType"));
+    EXPECT_TRUE(sent.contains("selfTradePreventionMode"));
+    EXPECT_TRUE(sent.contains("recvWindow"));
+    EXPECT_TRUE(sent.contains("signature"));
+}
+
+TEST(WebsocketApiTradeApi, NewAlgoOrderErrorResponse) {
+    MockWsServer server(reply({}, 400));
+    const auto api = api_for(server);
+    const NewAlgoOrderParams params{.algo_type = NewAlgoOrderAlgoTypeEnum::Conditional,
+                                    .symbol = "BTCUSD_PERP",
+                                    .side = NewAlgoOrderSideEnum::Buy,
+                                    .type = NewAlgoOrderTypeEnum::StopMarket};
+    EXPECT_THROW((void)api.new_algo_order(params), common::WebsocketResponseError);
 }
 
 TEST(WebsocketApiTradeApi, NewOrder) {

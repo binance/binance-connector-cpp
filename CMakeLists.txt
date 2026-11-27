@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 project(binance-connector-cpp
-    VERSION 1.0.0
+    VERSION 2.0.0
     DESCRIPTION "Binance public API connector for C++"
     HOMEPAGE_URL "https://github.com/binance/binance-connector-cpp"
     LANGUAGES CXX)

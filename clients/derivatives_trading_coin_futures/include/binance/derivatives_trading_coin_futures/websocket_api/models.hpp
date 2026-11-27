@@ -13,6 +13,9 @@
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/account_information_response_result.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/account_information_response_result_assets_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/account_information_response_result_positions_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_api/models/cancel_algo_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_api/models/cancel_algo_order_response_rate_limits_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_api/models/cancel_algo_order_response_result.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/cancel_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/cancel_order_response_rate_limits_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/cancel_order_response_result.hpp>
@@ -24,6 +27,9 @@
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/keepalive_user_data_stream_response_result.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/modify_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/modify_order_response_result.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_api/models/new_algo_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_api/models/new_algo_order_response_rate_limits_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/websocket_api/models/new_algo_order_response_result.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/new_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/new_order_response_result.hpp>
 #include <binance/derivatives_trading_coin_futures/websocket_api/models/position_information_response.hpp>

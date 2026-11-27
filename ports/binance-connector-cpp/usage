@@ -5,5 +5,5 @@ binance-connector-cpp provides CMake targets:
 
 Every connector is a feature named like its product, with hyphens: for example
 binance-connector-cpp[wallet,derivatives-trading-usds-futures] gives the components and targets
-wallet and derivatives_trading_usds_futures. spot is the default feature and "all" builds every
-connector. Without features, only binance::common is built.
+wallet and derivatives_trading_usds_futures, and "all" builds every connector. Without features,
+only binance::common is built.

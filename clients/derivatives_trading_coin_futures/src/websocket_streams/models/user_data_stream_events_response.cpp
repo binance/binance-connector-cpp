@@ -29,6 +29,14 @@ tag_invoke(boost::json::value_to_tag<UserDataStreamEventsResponse> /*tag*/,
                 out.value = boost::json::value_to<AccountUpdate>(jv);
                 return out;
             }
+            if (name == "ALGO_UPDATE") {
+                out.value = boost::json::value_to<AlgoUpdate>(jv);
+                return out;
+            }
+            if (name == "CONDITIONAL_ORDER_TRIGGER_REJECT") {
+                out.value = boost::json::value_to<ConditionalOrderTriggerReject>(jv);
+                return out;
+            }
             if (name == "GRID_UPDATE") {
                 out.value = boost::json::value_to<GridUpdate>(jv);
                 return out;
@@ -70,6 +78,14 @@ void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
     }
     if (std::holds_alternative<AccountUpdate>(v.value)) {
         (*obj)["e"] = "ACCOUNT_UPDATE";
+        return;
+    }
+    if (std::holds_alternative<AlgoUpdate>(v.value)) {
+        (*obj)["e"] = "ALGO_UPDATE";
+        return;
+    }
+    if (std::holds_alternative<ConditionalOrderTriggerReject>(v.value)) {
+        (*obj)["e"] = "CONDITIONAL_ORDER_TRIGGER_REJECT";
         return;
     }
     if (std::holds_alternative<GridUpdate>(v.value)) {

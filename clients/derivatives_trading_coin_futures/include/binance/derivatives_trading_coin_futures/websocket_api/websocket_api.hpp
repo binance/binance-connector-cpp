@@ -133,6 +133,31 @@ public:
 
     // TradeApi
 
+    /// Cancel Algo Order (TRADE)
+    ///
+    /// `algoOrder.cancel`.
+    ///
+    /// Cancel an active algo order.
+    ///
+    /// Weight(IP): 1
+    ///
+    /// Security Type: TRADE
+    ///
+    /// Notes:
+    /// - Either `algoId` or `clientAlgoId` must be sent.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#cancel-algo-order
+    [[nodiscard]] common::WebsocketApiResponse<CancelAlgoOrderResponseResult>
+    cancel_algo_order(const CancelAlgoOrderParams& params = {}) const {
+        return trade_api_.cancel_algo_order(params);
+    }
+    template <class CompletionToken>
+    auto async_cancel_algo_order(const CancelAlgoOrderParams& params,
+                                 CompletionToken&& token) const {
+        return trade_api_.async_cancel_algo_order(params, std::forward<CompletionToken>(token));
+    }
+
     /// Cancel Order (TRADE)
     ///
     /// `order.cancel`.
@@ -190,6 +215,97 @@ public:
     template <class CompletionToken>
     auto async_modify_order(const ModifyOrderParams& params, CompletionToken&& token) const {
         return trade_api_.async_modify_order(params, std::forward<CompletionToken>(token));
+    }
+
+    /// New Algo Order (TRADE)
+    ///
+    /// `algoOrder.place`.
+    ///
+    /// Send in a new algo order.
+    ///
+    /// Weight(IP): 0
+    ///
+    /// Security Type: TRADE
+    ///
+    /// Notes:
+    /// - Condition orders will be triggered when:
+    ///
+    /// >
+    ///
+    /// - If parameter`priceProtect`is sent as true:
+    ///
+    /// - when price reaches the `triggerPrice` ，the difference rate between
+    /// "MARK_PRICE" and "CONTRACT_PRICE" cannot be larger than the
+    /// "triggerProtect" of the symbol
+    ///
+    /// - "triggerProtect" of a symbol can be got from `GET
+    /// /dapi/v1/exchangeInfo`
+    ///
+    /// >
+    ///
+    /// - `STOP`, `STOP_MARKET`:
+    ///
+    /// - BUY: latest price ("MARK_PRICE" or "CONTRACT_PRICE") >= `triggerPrice`
+    ///
+    /// - SELL: latest price ("MARK_PRICE" or "CONTRACT_PRICE") <=
+    /// `triggerPrice`
+    ///
+    /// - `TAKE_PROFIT`, `TAKE_PROFIT_MARKET`:
+    ///
+    /// - BUY: latest price ("MARK_PRICE" or "CONTRACT_PRICE") <= `triggerPrice`
+    ///
+    /// - SELL: latest price ("MARK_PRICE" or "CONTRACT_PRICE") >=
+    /// `triggerPrice`
+    ///
+    /// - `TRAILING_STOP_MARKET`:
+    ///
+    /// - BUY: the lowest price after order placed <= `activatePrice`, and the
+    /// latest price >= the lowest price * (1 + `callbackRate`)
+    ///
+    /// - SELL: the highest price after order placed >= `activatePrice`, and the
+    /// latest price <= the highest price * (1 - `callbackRate`)
+    ///
+    /// >
+    ///
+    /// - For `TRAILING_STOP_MARKET`, if you got such error code.
+    ///
+    /// >   ``{"code": -2021, "msg": "Order would immediately trigger."}``
+    ///
+    /// >   means that the parameters you send do not meet the following
+    /// requirements:
+    ///
+    /// - BUY: `activatePrice` should be smaller than latest price.
+    ///
+    /// - SELL: `activatePrice` should be larger than latest price.
+    ///
+    /// >
+    ///
+    /// - `STOP_MARKET`, `TAKE_PROFIT_MARKET` with `closePosition`=`true`:
+    ///
+    /// - Follow the same rules for condition orders.
+    ///
+    /// - If triggered，**close all** current long position( if `SELL`) or
+    /// current short position( if `BUY`).
+    ///
+    /// - Cannot be used with `quantity` parameter
+    ///
+    /// - Cannot be used with `reduceOnly` parameter
+    ///
+    /// - In Hedge Mode,cannot be used with `BUY` orders in `LONG` position
+    /// side. and cannot be used with `SELL` orders in `SHORT` position side
+    ///
+    /// - `selfTradePreventionMode` is only effective when `timeInForce` set to
+    /// `IOC` or `GTC`.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/ws-api/trade#new-algo-order
+    [[nodiscard]] common::WebsocketApiResponse<NewAlgoOrderResponseResult>
+    new_algo_order(const NewAlgoOrderParams& params) const {
+        return trade_api_.new_algo_order(params);
+    }
+    template <class CompletionToken>
+    auto async_new_algo_order(const NewAlgoOrderParams& params, CompletionToken&& token) const {
+        return trade_api_.async_new_algo_order(params, std::forward<CompletionToken>(token));
     }
 
     /// New Order (TRADE)

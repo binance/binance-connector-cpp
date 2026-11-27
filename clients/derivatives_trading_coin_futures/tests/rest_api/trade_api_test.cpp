@@ -213,6 +213,249 @@ TEST(RestApiTradeApi, AutoCancelAllOpenOrdersBadRequest) {
     EXPECT_THROW((void)api.auto_cancel_all_open_orders(params), common::BadRequestError);
 }
 
+TEST(RestApiTradeApi, CancelAlgoOrder) {
+    const std::string example =
+        R"json({"algoId":2146760,"clientAlgoId":"6B2I9XVcJpCjqPAJ4YoFX7","code":"200","msg":"success"})json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const CancelAlgoOrderParams params{};
+    const auto res = api.cancel_algo_order(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "DELETE");
+    EXPECT_EQ(rec.path(), "/dapi/v1/algoOrder");
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, CancelAlgoOrderWithOptionalParams) {
+    const std::string example =
+        R"json({"algoId":2146760,"clientAlgoId":"6B2I9XVcJpCjqPAJ4YoFX7","code":"200","msg":"success"})json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const CancelAlgoOrderParams params{
+        .algo_id = 2146760,
+        .client_algo_id = "6B2I9XVcJpCjqPAJ4YoFX7",
+        .recv_window = 5000,
+    };
+    const auto res = api.cancel_algo_order(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "DELETE");
+    EXPECT_EQ(rec.path().find('{'), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("algoId="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("clientAlgoId="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("recvWindow="), std::string::npos);
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, CancelAlgoOrderBadRequest) {
+    MockServer server(reply(kBadRequest, 400));
+    const auto api = api_for(server);
+    const CancelAlgoOrderParams params{};
+    EXPECT_THROW((void)api.cancel_algo_order(params), common::BadRequestError);
+}
+
+TEST(RestApiTradeApi, NewAlgoOrder) {
+    const std::string example =
+        R"json({"algoId":2146760,"clientAlgoId":"6B2I9XVcJpCjqPAJ4YoFX7","algoType":"CONDITIONAL","orderType":"TAKE_PROFIT","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"BOTH","timeInForce":"GTC","quantity":"0.01","algoStatus":"NEW","triggerPrice":"750.000","price":"750.000","icebergQuantity":"null","selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,"activatePrice":"","callbackRate":"","createTime":1750485492076,"updateTime":1750485492076,"triggerTime":0,"goodTillDate":0})json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const NewAlgoOrderParams params{.algo_type = NewAlgoOrderAlgoTypeEnum::Conditional,
+                                    .symbol = "BTCUSD_PERP",
+                                    .side = NewAlgoOrderSideEnum::Buy,
+                                    .type = NewAlgoOrderTypeEnum::Limit};
+    const auto res = api.new_algo_order(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "POST");
+    EXPECT_EQ(rec.path(), "/dapi/v1/algoOrder");
+    EXPECT_NE((rec.query() + "&" + rec.body).find("algoType="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("symbol="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("side="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("type="), std::string::npos);
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, NewAlgoOrderWithOptionalParams) {
+    const std::string example =
+        R"json({"algoId":2146760,"clientAlgoId":"6B2I9XVcJpCjqPAJ4YoFX7","algoType":"CONDITIONAL","orderType":"TAKE_PROFIT","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"BOTH","timeInForce":"GTC","quantity":"0.01","algoStatus":"NEW","triggerPrice":"750.000","price":"750.000","icebergQuantity":"null","selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,"activatePrice":"","callbackRate":"","createTime":1750485492076,"updateTime":1750485492076,"triggerTime":0,"goodTillDate":0})json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const NewAlgoOrderParams params{
+        .algo_type = NewAlgoOrderAlgoTypeEnum::Conditional,
+        .symbol = "BTCUSD_PERP",
+        .side = NewAlgoOrderSideEnum::Buy,
+        .type = NewAlgoOrderTypeEnum::Limit,
+        .position_side = "BOTH",
+        .time_in_force = NewAlgoOrderTimeInForceEnum::Gtc,
+        .quantity = common::Decimal("1.0"),
+        .price = common::Decimal("1.0"),
+        .trigger_price = common::Decimal("1.0"),
+        .working_type = NewAlgoOrderWorkingTypeEnum::MarkPrice,
+        .price_match = NewAlgoOrderPriceMatchEnum::Opponent,
+        .close_position = NewAlgoOrderClosePositionEnum::True_,
+        .price_protect = NewAlgoOrderPriceProtectEnum::True_,
+        .reduce_only = NewAlgoOrderReduceOnlyEnum::True_,
+        .activate_price = common::Decimal("1.0"),
+        .callback_rate = common::Decimal("1"),
+        .client_algo_id = "1",
+        .new_order_resp_type = NewAlgoOrderNewOrderRespTypeEnum::Ack,
+        .self_trade_prevention_mode = NewAlgoOrderSelfTradePreventionModeEnum::None_,
+        .recv_window = 5000,
+    };
+    const auto res = api.new_algo_order(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "POST");
+    EXPECT_EQ(rec.path().find('{'), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("algoType="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("symbol="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("side="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("type="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("positionSide="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("timeInForce="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("quantity="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("price="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("triggerPrice="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("workingType="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("priceMatch="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("closePosition="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("priceProtect="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("reduceOnly="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("activatePrice="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("callbackRate="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("clientAlgoId="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("newOrderRespType="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("selfTradePreventionMode="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("recvWindow="), std::string::npos);
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, NewAlgoOrderBadRequest) {
+    MockServer server(reply(kBadRequest, 400));
+    const auto api = api_for(server);
+    const NewAlgoOrderParams params{.algo_type = NewAlgoOrderAlgoTypeEnum::Conditional,
+                                    .symbol = "BTCUSD_PERP",
+                                    .side = NewAlgoOrderSideEnum::Buy,
+                                    .type = NewAlgoOrderTypeEnum::Limit};
+    EXPECT_THROW((void)api.new_algo_order(params), common::BadRequestError);
+}
+
+TEST(RestApiTradeApi, QueryAlgoOrder) {
+    const std::string example =
+        R"json({"algoId":2146760,"clientAlgoId":"6B2I9XVcJpCjqPAJ4YoFX7","algoType":"CONDITIONAL","orderType":"TAKE_PROFIT","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"BOTH","timeInForce":"GTC","quantity":"0.01","algoStatus":"CANCELED","actualOrderId":"","actualPrice":"0.00000","actualType":"LIMIT","actualQty":"0.01","triggerPrice":"750.000","price":"750.000","icebergQuantity":"null","tpOrderType":"","selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,"createTime":1750485492076,"updateTime":1750514545091,"triggerTime":0,"goodTillDate":0})json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const QueryAlgoOrderParams params{};
+    const auto res = api.query_algo_order(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "GET");
+    EXPECT_EQ(rec.path(), "/dapi/v1/algoOrder");
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, QueryAlgoOrderWithOptionalParams) {
+    const std::string example =
+        R"json({"algoId":2146760,"clientAlgoId":"6B2I9XVcJpCjqPAJ4YoFX7","algoType":"CONDITIONAL","orderType":"TAKE_PROFIT","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"BOTH","timeInForce":"GTC","quantity":"0.01","algoStatus":"CANCELED","actualOrderId":"","actualPrice":"0.00000","actualType":"LIMIT","actualQty":"0.01","triggerPrice":"750.000","price":"750.000","icebergQuantity":"null","tpOrderType":"","selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,"createTime":1750485492076,"updateTime":1750514545091,"triggerTime":0,"goodTillDate":0})json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const QueryAlgoOrderParams params{
+        .algo_id = 1,
+        .client_algo_id = "1",
+        .recv_window = 5000,
+    };
+    const auto res = api.query_algo_order(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "GET");
+    EXPECT_EQ(rec.path().find('{'), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("algoId="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("clientAlgoId="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("recvWindow="), std::string::npos);
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, QueryAlgoOrderBadRequest) {
+    MockServer server(reply(kBadRequest, 400));
+    const auto api = api_for(server);
+    const QueryAlgoOrderParams params{};
+    EXPECT_THROW((void)api.query_algo_order(params), common::BadRequestError);
+}
+
+TEST(RestApiTradeApi, CancelAllAlgoOpenOrders) {
+    const std::string example =
+        R"json({"code":200,"msg":"The operation of cancel all open order is done."})json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const CancelAllAlgoOpenOrdersParams params{.symbol = "BTCUSD_PERP"};
+    const auto res = api.cancel_all_algo_open_orders(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "DELETE");
+    EXPECT_EQ(rec.path(), "/dapi/v1/algoOpenOrders");
+    EXPECT_NE((rec.query() + "&" + rec.body).find("symbol="), std::string::npos);
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, CancelAllAlgoOpenOrdersWithOptionalParams) {
+    const std::string example =
+        R"json({"code":200,"msg":"The operation of cancel all open order is done."})json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const CancelAllAlgoOpenOrdersParams params{
+        .symbol = "BTCUSD_PERP",
+        .recv_window = 5000,
+    };
+    const auto res = api.cancel_all_algo_open_orders(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "DELETE");
+    EXPECT_EQ(rec.path().find('{'), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("symbol="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("recvWindow="), std::string::npos);
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, CancelAllAlgoOpenOrdersBadRequest) {
+    MockServer server(reply(kBadRequest, 400));
+    const auto api = api_for(server);
+    const CancelAllAlgoOpenOrdersParams params{.symbol = "BTCUSD_PERP"};
+    EXPECT_THROW((void)api.cancel_all_algo_open_orders(params), common::BadRequestError);
+}
+
 TEST(RestApiTradeApi, CancelAllOpenOrders) {
     const std::string example =
         R"json({"code":200,"msg":"The operation of cancel all open order is done."})json";
@@ -821,6 +1064,58 @@ TEST(RestApiTradeApi, ChangePositionModeBadRequest) {
     EXPECT_THROW((void)api.change_position_mode(params), common::BadRequestError);
 }
 
+TEST(RestApiTradeApi, CurrentAllAlgoOpenOrders) {
+    const std::string example =
+        R"json([{"algoId":2148627,"clientAlgoId":"MRumok0dkhrP4kCm12AHaB","algoType":"CONDITIONAL","orderType":"TAKE_PROFIT","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"BOTH","timeInForce":"GTC","quantity":"0.01","algoStatus":"NEW","actualOrderId":"","actualPrice":"0.00000","triggerPrice":"750.000","price":"750.000","icebergQuantity":"null","tpTriggerPrice":"0.000","tpPrice":"0.000","slTriggerPrice":"0.000","slPrice":"0.000","tpOrderType":"","selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,"createTime":1750514941540,"updateTime":1750514941540,"triggerTime":0,"goodTillDate":0}])json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const CurrentAllAlgoOpenOrdersParams params{};
+    const auto res = api.current_all_algo_open_orders(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "GET");
+    EXPECT_EQ(rec.path(), "/dapi/v1/openAlgoOrders");
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, CurrentAllAlgoOpenOrdersWithOptionalParams) {
+    const std::string example =
+        R"json([{"algoId":2148627,"clientAlgoId":"MRumok0dkhrP4kCm12AHaB","algoType":"CONDITIONAL","orderType":"TAKE_PROFIT","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"BOTH","timeInForce":"GTC","quantity":"0.01","algoStatus":"NEW","actualOrderId":"","actualPrice":"0.00000","triggerPrice":"750.000","price":"750.000","icebergQuantity":"null","tpTriggerPrice":"0.000","tpPrice":"0.000","slTriggerPrice":"0.000","slPrice":"0.000","tpOrderType":"","selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,"createTime":1750514941540,"updateTime":1750514941540,"triggerTime":0,"goodTillDate":0}])json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const CurrentAllAlgoOpenOrdersParams params{
+        .algo_type = "CONDITIONAL",
+        .symbol = "BTCUSD_PERP",
+        .algo_id = 2148627,
+        .recv_window = 5000,
+    };
+    const auto res = api.current_all_algo_open_orders(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "GET");
+    EXPECT_EQ(rec.path().find('{'), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("algoType="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("symbol="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("algoId="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("recvWindow="), std::string::npos);
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, CurrentAllAlgoOpenOrdersBadRequest) {
+    MockServer server(reply(kBadRequest, 400));
+    const auto api = api_for(server);
+    const CurrentAllAlgoOpenOrdersParams params{};
+    EXPECT_THROW((void)api.current_all_algo_open_orders(params), common::BadRequestError);
+}
+
 TEST(RestApiTradeApi, CurrentAllOpenOrders) {
     const std::string example =
         R"json([{"avgPrice":"0.0","clientOrderId":"abc","cumBase":"0","executedQty":"0","orderId":1917641,"origQty":"0.40","origType":"TRAILING_STOP_MARKET","price":"0","reduceOnly":false,"side":"BUY","positionSide":"SHORT","status":"NEW","stopPrice":"9300","closePosition":false,"symbol":"BTCUSD_200925","pair":"BTCUSD","time":1579276756075,"timeInForce":"GTC","type":"TRAILING_STOP_MARKET","activatePrice":"9020","priceRate":"0.3","updateTime":1579276756075,"workingType":"CONTRACT_PRICE","priceProtect":false,"priceMatch":"NONE","selfTradePreventionMode":"EXPIRE_MAKER"}])json";
@@ -1142,6 +1437,63 @@ TEST(RestApiTradeApi, PositionInformationBadRequest) {
     const auto api = api_for(server);
     const PositionInformationParams params{};
     EXPECT_THROW((void)api.position_information(params), common::BadRequestError);
+}
+
+TEST(RestApiTradeApi, QueryAllAlgoOrders) {
+    const std::string example =
+        R"json([{"algoId":2146760,"clientAlgoId":"6B2I9XVcJpCjqPAJ4YoFX7","algoType":"CONDITIONAL","orderType":"TAKE_PROFIT","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"BOTH","timeInForce":"GTC","quantity":"0.01","algoStatus":"CANCELED","actualOrderId":"","actualPrice":"0.00000","triggerPrice":"750.000","price":"750.000","icebergQuantity":"null","tpTriggerPrice":"0.000","tpPrice":"0.000","slTriggerPrice":"0.000","slPrice":"0.000","tpOrderType":"","selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,"createTime":1750485492076,"updateTime":1750514545091,"triggerTime":0,"goodTillDate":0}])json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const QueryAllAlgoOrdersParams params{.symbol = "BTCUSD_PERP"};
+    const auto res = api.query_all_algo_orders(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "GET");
+    EXPECT_EQ(rec.path(), "/dapi/v1/allAlgoOrders");
+    EXPECT_NE((rec.query() + "&" + rec.body).find("symbol="), std::string::npos);
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, QueryAllAlgoOrdersWithOptionalParams) {
+    const std::string example =
+        R"json([{"algoId":2146760,"clientAlgoId":"6B2I9XVcJpCjqPAJ4YoFX7","algoType":"CONDITIONAL","orderType":"TAKE_PROFIT","symbol":"BTCUSD_PERP","side":"SELL","positionSide":"BOTH","timeInForce":"GTC","quantity":"0.01","algoStatus":"CANCELED","actualOrderId":"","actualPrice":"0.00000","triggerPrice":"750.000","price":"750.000","icebergQuantity":"null","tpTriggerPrice":"0.000","tpPrice":"0.000","slTriggerPrice":"0.000","slPrice":"0.000","tpOrderType":"","selfTradePreventionMode":"EXPIRE_MAKER","workingType":"CONTRACT_PRICE","priceMatch":"NONE","closePosition":false,"priceProtect":false,"reduceOnly":false,"createTime":1750485492076,"updateTime":1750514545091,"triggerTime":0,"goodTillDate":0}])json";
+    MockServer server(reply(example));
+    const auto api = api_for(server);
+    const QueryAllAlgoOrdersParams params{
+        .symbol = "BTCUSD_PERP",
+        .algo_id = 2146760,
+        .start_time = 1623319461670,
+        .end_time = 1641782889000,
+        .limit = 50,
+        .recv_window = 5000,
+    };
+    const auto res = api.query_all_algo_orders(params);
+    EXPECT_EQ(res.status(), 200);
+
+    EXPECT_NO_THROW((void)res.data());
+
+    const auto rec = server.requests().at(0);
+    EXPECT_EQ(rec.method, "GET");
+    EXPECT_EQ(rec.path().find('{'), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("symbol="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("algoId="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("startTime="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("endTime="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("limit="), std::string::npos);
+    EXPECT_NE((rec.query() + "&" + rec.body).find("recvWindow="), std::string::npos);
+    EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
+    EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
+}
+
+TEST(RestApiTradeApi, QueryAllAlgoOrdersBadRequest) {
+    MockServer server(reply(kBadRequest, 400));
+    const auto api = api_for(server);
+    const QueryAllAlgoOrdersParams params{.symbol = "BTCUSD_PERP"};
+    EXPECT_THROW((void)api.query_all_algo_orders(params), common::BadRequestError);
 }
 
 TEST(RestApiTradeApi, QueryCurrentOpenOrder) {

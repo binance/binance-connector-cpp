@@ -77,18 +77,19 @@ Each connector is a CMake component and target. Build or install only the ones y
 
 The repository contains a vcpkg port in [`ports/binance-connector-cpp`](./ports/binance-connector-cpp).
 Use it as an overlay port: it builds the checkout it is in, so check out the release you want first
-(`git checkout v1.0.0`). Every connector is a feature named like the product, with hyphens instead
-of underscores (vcpkg does not allow them): `copy-trading` builds the `copy_trading` component. `spot`
-is the default feature and `all` builds every connector:
+(`git checkout v2.0.0`). Every connector is a feature named like the product, with hyphens instead
+of underscores (vcpkg does not allow them): `copy-trading` builds the `copy_trading` component. Name
+the connectors you need (there is no default one: without features, only `binance::common` is built), or
+`all` for every connector:
 
 ```bash
-vcpkg install binance-connector-cpp --overlay-ports=/path/to/binance-connector-cpp/ports
+vcpkg install "binance-connector-cpp[spot]" --overlay-ports=/path/to/binance-connector-cpp/ports
 vcpkg install "binance-connector-cpp[wallet,derivatives-trading-usds-futures]" --overlay-ports=/path/to/binance-connector-cpp/ports
 vcpkg install "binance-connector-cpp[all]" --overlay-ports=/path/to/binance-connector-cpp/ports
 ```
 
 In a `vcpkg.json` manifest, list the features you need:
-`{ "name": "binance-connector-cpp", "default-features": false, "features": ["spot", "wallet"] }`.
+`{ "name": "binance-connector-cpp", "features": ["spot", "wallet"] }`.
 
 In manifest mode, pass `--overlay-ports` the same way or set `VCPKG_OVERLAY_PORTS`.
 
@@ -175,7 +176,7 @@ include(FetchContent)
 set(BINANCE_PRODUCTS "spot" CACHE STRING "" FORCE)
 FetchContent_Declare(binance-connector-cpp
     GIT_REPOSITORY https://github.com/binance/binance-connector-cpp.git
-    GIT_TAG v1.0.0)
+    GIT_TAG v2.0.0)
 FetchContent_MakeAvailable(binance-connector-cpp)
 target_link_libraries(app PRIVATE binance::spot)
 ```

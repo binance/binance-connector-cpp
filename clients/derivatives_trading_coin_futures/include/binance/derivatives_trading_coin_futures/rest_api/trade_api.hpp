@@ -26,12 +26,15 @@
 #include <binance/derivatives_trading_coin_futures/rest_api/models/account_trade_list_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/all_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/auto_cancel_all_open_orders_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_algo_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_all_algo_open_orders_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_all_open_orders_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_multiple_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/change_initial_leverage_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/change_margin_type_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/change_position_mode_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/current_all_algo_open_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/current_all_open_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/get_order_modify_history_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/get_position_margin_change_history_response_inner.hpp>
@@ -39,16 +42,198 @@
 #include <binance/derivatives_trading_coin_futures/rest_api/models/modify_multiple_orders_batch_orders_parameter_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/modify_multiple_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/modify_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/new_algo_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/new_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/place_multiple_orders_batch_orders_parameter_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/place_multiple_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/position_adl_quantile_estimation_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/position_information_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/query_algo_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/query_all_algo_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/query_current_open_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/query_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/users_force_orders_response_inner.hpp>
 
 namespace binance::derivatives_trading_coin_futures::rest_api {
+
+enum class NewAlgoOrderAlgoTypeEnum {
+    Conditional,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderAlgoTypeEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderAlgoTypeEnum tag_invoke(
+    boost::json::value_to_tag<NewAlgoOrderAlgoTypeEnum> /*tag*/, const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void tag_invoke(boost::json::value_from_tag /*tag*/,
+                                                                boost::json::value& jv,
+                                                                NewAlgoOrderAlgoTypeEnum value);
+
+enum class NewAlgoOrderSideEnum {
+    Buy,
+    Sell,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderSideEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderSideEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderSideEnum> /*tag*/, const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void
+tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv, NewAlgoOrderSideEnum value);
+
+enum class NewAlgoOrderTypeEnum {
+    Limit,
+    Market,
+    Stop,
+    StopMarket,
+    TakeProfit,
+    TakeProfitMarket,
+    TrailingStopMarket,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderTypeEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderTypeEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderTypeEnum> /*tag*/, const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void
+tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv, NewAlgoOrderTypeEnum value);
+
+enum class NewAlgoOrderTimeInForceEnum {
+    Gtc,
+    Ioc,
+    Fok,
+    Gtx,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderTimeInForceEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderTimeInForceEnum tag_invoke(
+    boost::json::value_to_tag<NewAlgoOrderTimeInForceEnum> /*tag*/, const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void tag_invoke(boost::json::value_from_tag /*tag*/,
+                                                                boost::json::value& jv,
+                                                                NewAlgoOrderTimeInForceEnum value);
+
+enum class NewAlgoOrderWorkingTypeEnum {
+    MarkPrice,
+    ContractPrice,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderWorkingTypeEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderWorkingTypeEnum tag_invoke(
+    boost::json::value_to_tag<NewAlgoOrderWorkingTypeEnum> /*tag*/, const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void tag_invoke(boost::json::value_from_tag /*tag*/,
+                                                                boost::json::value& jv,
+                                                                NewAlgoOrderWorkingTypeEnum value);
+
+enum class NewAlgoOrderPriceMatchEnum {
+    Opponent,
+    Opponent5,
+    Opponent10,
+    Opponent20,
+    Queue,
+    Queue5,
+    Queue10,
+    Queue20,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderPriceMatchEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderPriceMatchEnum tag_invoke(
+    boost::json::value_to_tag<NewAlgoOrderPriceMatchEnum> /*tag*/, const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void tag_invoke(boost::json::value_from_tag /*tag*/,
+                                                                boost::json::value& jv,
+                                                                NewAlgoOrderPriceMatchEnum value);
+
+enum class NewAlgoOrderClosePositionEnum {
+    True_,
+    False_,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderClosePositionEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderClosePositionEnum tag_invoke(
+    boost::json::value_to_tag<NewAlgoOrderClosePositionEnum> /*tag*/, const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void
+tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+           NewAlgoOrderClosePositionEnum value);
+
+enum class NewAlgoOrderPriceProtectEnum {
+    True_,
+    False_,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderPriceProtectEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderPriceProtectEnum tag_invoke(
+    boost::json::value_to_tag<NewAlgoOrderPriceProtectEnum> /*tag*/, const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void tag_invoke(boost::json::value_from_tag /*tag*/,
+                                                                boost::json::value& jv,
+                                                                NewAlgoOrderPriceProtectEnum value);
+
+enum class NewAlgoOrderReduceOnlyEnum {
+    True_,
+    False_,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderReduceOnlyEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderReduceOnlyEnum tag_invoke(
+    boost::json::value_to_tag<NewAlgoOrderReduceOnlyEnum> /*tag*/, const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void tag_invoke(boost::json::value_from_tag /*tag*/,
+                                                                boost::json::value& jv,
+                                                                NewAlgoOrderReduceOnlyEnum value);
+
+enum class NewAlgoOrderNewOrderRespTypeEnum {
+    Ack,
+    Result,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderNewOrderRespTypeEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderNewOrderRespTypeEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderNewOrderRespTypeEnum> /*tag*/,
+           const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void
+tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+           NewAlgoOrderNewOrderRespTypeEnum value);
+
+enum class NewAlgoOrderSelfTradePreventionModeEnum {
+    None_,
+    ExpireTaker,
+    ExpireBoth,
+    ExpireMaker,
+    /// A value this SDK version does not know, which a newer value decodes to. It cannot be sent.
+    Unknown,
+};
+
+[[nodiscard]] BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT std::string_view
+to_string(NewAlgoOrderSelfTradePreventionModeEnum value) noexcept;
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT NewAlgoOrderSelfTradePreventionModeEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderSelfTradePreventionModeEnum> /*tag*/,
+           const boost::json::value& jv);
+BINANCE_DERIVATIVES_TRADING_COIN_FUTURES_EXPORT void
+tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+           NewAlgoOrderSelfTradePreventionModeEnum value);
 
 enum class ModifyOrderSideEnum {
     Buy,
@@ -339,6 +524,66 @@ struct AutoCancelAllOpenOrdersParams {
     std::optional<std::int64_t> recv_window = std::nullopt;
 };
 
+struct CancelAlgoOrderParams {
+    std::optional<std::int64_t> algo_id = std::nullopt;
+    std::optional<std::string> client_algo_id = std::nullopt;
+    std::optional<std::int64_t> recv_window = std::nullopt;
+};
+
+struct NewAlgoOrderParams {
+    common::Required<NewAlgoOrderAlgoTypeEnum> algo_type;
+    common::Required<std::string> symbol;
+    common::Required<NewAlgoOrderSideEnum> side;
+    common::Required<NewAlgoOrderTypeEnum> type;
+    /// Default `BOTH` for One-way Mode ; `LONG` or `SHORT` for Hedge Mode. It must be sent in Hedge
+    /// Mode.
+    std::optional<std::string> position_side = std::nullopt;
+    std::optional<NewAlgoOrderTimeInForceEnum> time_in_force = std::nullopt;
+    /// quantity measured by contract number, Cannot be sent with `closePosition`=`true`(Close-All)
+    std::optional<common::Decimal> quantity = std::nullopt;
+    std::optional<common::Decimal> price = std::nullopt;
+    /// Trigger price
+    std::optional<common::Decimal> trigger_price = std::nullopt;
+    std::optional<NewAlgoOrderWorkingTypeEnum> working_type = std::nullopt;
+    /// only available for `LIMIT`/`STOP`/`TAKE_PROFIT` order; Can't be passed together with `price`
+    std::optional<NewAlgoOrderPriceMatchEnum> price_match = std::nullopt;
+    /// Close-All，used with `STOP_MARKET` or `TAKE_PROFIT_MARKET`.
+    std::optional<NewAlgoOrderClosePositionEnum> close_position = std::nullopt;
+    /// Used with `STOP_MARKET` or `TAKE_PROFIT_MARKET` order. when price reaches the triggerPrice
+    /// ，the difference rate between "MARK_PRICE" and "CONTRACT_PRICE" cannot be larger than the
+    /// Price Protection Threshold of the symbol.
+    std::optional<NewAlgoOrderPriceProtectEnum> price_protect = std::nullopt;
+    /// Cannot be sent in Hedge Mode; cannot be sent with `closePosition`=`true`
+    std::optional<NewAlgoOrderReduceOnlyEnum> reduce_only = std::nullopt;
+    /// Used with `TRAILING_STOP_MARKET` orders, default as the latest price(supporting different
+    /// `workingType`)
+    std::optional<common::Decimal> activate_price = std::nullopt;
+    /// Used with `TRAILING_STOP_MARKET` orders
+    std::optional<common::Decimal> callback_rate = std::nullopt;
+    /// A unique id among open orders. Automatically generated if not sent. Can only be string
+    /// following the rule: `^[\.A-Z\:/a-z0-9_-]{1,36}$`
+    std::optional<std::string> client_algo_id = std::nullopt;
+    std::optional<NewAlgoOrderNewOrderRespTypeEnum> new_order_resp_type = std::nullopt;
+    /// `EXPIRE_TAKER`: expire taker order when STP triggers / `EXPIRE_MAKER`: expire maker order
+    /// when STP triggers/ `EXPIRE_BOTH`: expire both orders when STP triggers; default `NONE`
+    std::optional<NewAlgoOrderSelfTradePreventionModeEnum> self_trade_prevention_mode =
+        std::nullopt;
+    std::optional<std::int64_t> recv_window = std::nullopt;
+};
+
+struct QueryAlgoOrderParams {
+    /// Order ID
+    std::optional<std::int64_t> algo_id = std::nullopt;
+    /// Client order ID
+    std::optional<std::string> client_algo_id = std::nullopt;
+    std::optional<std::int64_t> recv_window = std::nullopt;
+};
+
+struct CancelAllAlgoOpenOrdersParams {
+    common::Required<std::string> symbol;
+    std::optional<std::int64_t> recv_window = std::nullopt;
+};
+
 struct CancelAllOpenOrdersParams {
     /// Symbol
     common::Required<std::string> symbol;
@@ -474,6 +719,13 @@ struct ChangePositionModeParams {
     std::optional<std::int64_t> recv_window = std::nullopt;
 };
 
+struct CurrentAllAlgoOpenOrdersParams {
+    std::optional<std::string> algo_type = std::nullopt;
+    std::optional<std::string> symbol = std::nullopt;
+    std::optional<std::int64_t> algo_id = std::nullopt;
+    std::optional<std::int64_t> recv_window = std::nullopt;
+};
+
 struct CurrentAllOpenOrdersParams {
     /// Symbol. **After CM migration, an invalid `symbol` returns `-1121` (previously a silent
     /// `200`).**
@@ -533,6 +785,16 @@ struct PositionAdlQuantileEstimationParams {
 struct PositionInformationParams {
     std::optional<std::string> margin_asset = std::nullopt;
     std::optional<std::string> pair = std::nullopt;
+    std::optional<std::int64_t> recv_window = std::nullopt;
+};
+
+struct QueryAllAlgoOrdersParams {
+    /// Symbol
+    common::Required<std::string> symbol;
+    std::optional<std::int64_t> algo_id = std::nullopt;
+    std::optional<std::int64_t> start_time = std::nullopt;
+    std::optional<std::int64_t> end_time = std::nullopt;
+    std::optional<std::int64_t> limit = std::nullopt;
     std::optional<std::int64_t> recv_window = std::nullopt;
 };
 
@@ -673,6 +935,155 @@ public:
                                            CompletionToken&& token) const {
         return common::async_send<AutoCancelAllOpenOrdersResponse>(
             client_, auto_cancel_all_open_orders_request(params),
+            std::forward<CompletionToken>(token));
+    }
+
+    /// Cancel Algo Order (TRADE)
+    ///
+    /// DELETE /dapi/v1/algoOrder.
+    ///
+    /// Cancel an active algo (conditional) order, including TP/SL (Take Profit / Stop Loss) and
+    /// trailing stop orders on COIN-M Futures.
+    ///
+    /// Weight(IP): 1
+    ///
+    /// Security Type: TRADE
+    ///
+    /// Notes:
+    /// - Either `algoId` or `clientAlgoId` must be sent.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#cancel-algo-order
+    [[nodiscard]] common::RestApiResponse<CancelAlgoOrderResponse>
+    cancel_algo_order(const CancelAlgoOrderParams& params = {}) const;
+
+    /// Asynchronous `cancel_algo_order()`. Completes with
+    /// `void(std::exception_ptr, common::RestApiResponse<CancelAlgoOrderResponse>)`.
+    template <class CompletionToken>
+    auto async_cancel_algo_order(const CancelAlgoOrderParams& params,
+                                 CompletionToken&& token) const {
+        return common::async_send<CancelAlgoOrderResponse>(
+            client_, cancel_algo_order_request(params), std::forward<CompletionToken>(token));
+    }
+
+    /// New Algo Order (TRADE)
+    ///
+    /// POST /dapi/v1/algoOrder.
+    ///
+    /// Send in a new algo (conditional) order. Use this endpoint to place **TP/SL (Take Profit /
+    /// Stop Loss)** and trailing stop orders on COIN-M Futures. Supported order types under
+    /// `algoType=CONDITIONAL` are `STOP_MARKET`, `TAKE_PROFIT_MARKET`, `STOP`, `TAKE_PROFIT`, and
+    /// `TRAILING_STOP_MARKET`.
+    ///
+    /// Weight: 1 on 10s order rate limit(X-MBX-ORDER-COUNT-10S);
+    /// 1 on 1min order rate limit(X-MBX-ORDER-COUNT-1M);
+    /// 0 on IP rate limit(x-mbx-used-weight-1m)
+    ///
+    /// Security Type: TRADE
+    ///
+    /// Notes:
+    /// - Algo order with type `STOP`, parameter `timeInForce` can be sent (default `GTC`).
+    /// - Algo order with type `TAKE_PROFIT`, parameter `timeInForce` can be sent ( default `GTC`).
+    /// - Condition orders will be triggered when:
+    ///   - If parameter`priceProtect`is sent as true:
+    ///     - when price reaches the `triggerPrice` ，the difference rate between "MARK_PRICE" and
+    ///     "CONTRACT_PRICE" cannot be larger than the "triggerProtect" of the symbol
+    ///     - "triggerProtect" of a symbol can be got from `GET /dapi/v1/exchangeInfo`
+    ///   - `STOP`, `STOP_MARKET`:
+    ///     - BUY: latest price ("MARK_PRICE" or "CONTRACT_PRICE") >= `triggerPrice`
+    ///     - SELL: latest price ("MARK_PRICE" or "CONTRACT_PRICE") <= `triggerPrice`
+    ///   - `TAKE_PROFIT`, `TAKE_PROFIT_MARKET`:
+    ///     - BUY: latest price ("MARK_PRICE" or "CONTRACT_PRICE") <= `triggerPrice`
+    ///     - SELL: latest price ("MARK_PRICE" or "CONTRACT_PRICE") >= `triggerPrice`
+    ///   - `TRAILING_STOP_MARKET`:
+    ///     - BUY: the lowest price after order placed <= `activatePrice`, and the latest price >=
+    ///     the lowest price * (1 + `callbackRate`)
+    ///     - SELL: the highest price after order placed >= `activatePrice`, and the latest price <=
+    ///     the highest price * (1 - `callbackRate`)
+    /// - For `TRAILING_STOP_MARKET`, if you got such error code. > `{"code": -2021, "msg": "Order
+    /// would immediately trigger."}` > means that the parameters you send do not meet the following
+    /// requirements:
+    ///   - BUY: `activatePrice` should be smaller than latest price.
+    ///   - SELL: `activatePrice` should be larger than latest price.
+    /// - `STOP_MARKET`, `TAKE_PROFIT_MARKET` with `closePosition`=`true`:
+    ///   - Follow the same rules for condition orders.
+    ///   - If triggered，**close all** current long position( if `SELL`) or current short position(
+    ///   if `BUY`).
+    ///   - Cannot be used with `quantity` parameter
+    ///   - Cannot be used with `reduceOnly` parameter
+    ///   - In Hedge Mode,cannot be used with `BUY` orders in `LONG` position side. and cannot be
+    ///   used with `SELL` orders in `SHORT` position side
+    /// - `selfTradePreventionMode` is only effective when `timeInForce` set to `IOC` or `GTC`.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#new-algo-order
+    [[nodiscard]] common::RestApiResponse<NewAlgoOrderResponse>
+    new_algo_order(const NewAlgoOrderParams& params) const;
+
+    /// Asynchronous `new_algo_order()`. Completes with
+    /// `void(std::exception_ptr, common::RestApiResponse<NewAlgoOrderResponse>)`.
+    template <class CompletionToken>
+    auto async_new_algo_order(const NewAlgoOrderParams& params, CompletionToken&& token) const {
+        return common::async_send<NewAlgoOrderResponse>(client_, new_algo_order_request(params),
+                                                        std::forward<CompletionToken>(token));
+    }
+
+    /// Query Algo Order (USER_DATA)
+    ///
+    /// GET /dapi/v1/algoOrder.
+    ///
+    /// Check the status of an algo (conditional) order, such as TP/SL (Take Profit / Stop Loss) or
+    /// trailing stop orders on COIN-M Futures.
+    ///
+    /// * These orders will not be found:
+    ///   * order status is `CANCELED` or `EXPIRED` **AND** order has NO filled trade **AND**
+    ///   created time + 3 days < current time
+    ///   * order create time + 90 days < current time
+    ///
+    /// Weight(IP): 1
+    ///
+    /// Security Type: USER_DATA
+    ///
+    /// Notes:
+    /// - Either `algoId` or `clientAlgoId` must be sent.
+    /// - `algoId` is self-increment for each specific `symbol`
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#query-algo-order
+    [[nodiscard]] common::RestApiResponse<QueryAlgoOrderResponse>
+    query_algo_order(const QueryAlgoOrderParams& params = {}) const;
+
+    /// Asynchronous `query_algo_order()`. Completes with
+    /// `void(std::exception_ptr, common::RestApiResponse<QueryAlgoOrderResponse>)`.
+    template <class CompletionToken>
+    auto async_query_algo_order(const QueryAlgoOrderParams& params, CompletionToken&& token) const {
+        return common::async_send<QueryAlgoOrderResponse>(client_, query_algo_order_request(params),
+                                                          std::forward<CompletionToken>(token));
+    }
+
+    /// Cancel All Algo Open Orders (TRADE)
+    ///
+    /// DELETE /dapi/v1/algoOpenOrders.
+    ///
+    /// Cancel all open algo (conditional) orders on a symbol, including TP/SL (Take Profit / Stop
+    /// Loss) and trailing stop orders on COIN-M Futures.
+    ///
+    /// Weight(IP): 1
+    ///
+    /// Security Type: TRADE
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#cancel-all-algo-open-orders
+    [[nodiscard]] common::RestApiResponse<CancelAllAlgoOpenOrdersResponse>
+    cancel_all_algo_open_orders(const CancelAllAlgoOpenOrdersParams& params) const;
+
+    /// Asynchronous `cancel_all_algo_open_orders()`. Completes with
+    /// `void(std::exception_ptr, common::RestApiResponse<CancelAllAlgoOpenOrdersResponse>)`.
+    template <class CompletionToken>
+    auto async_cancel_all_algo_open_orders(const CancelAllAlgoOpenOrdersParams& params,
+                                           CompletionToken&& token) const {
+        return common::async_send<CancelAllAlgoOpenOrdersResponse>(
+            client_, cancel_all_algo_open_orders_request(params),
             std::forward<CompletionToken>(token));
     }
 
@@ -1041,6 +1452,38 @@ public:
             client_, change_position_mode_request(params), std::forward<CompletionToken>(token));
     }
 
+    /// Current All Algo Open Orders (USER_DATA)
+    ///
+    /// GET /dapi/v1/openAlgoOrders.
+    ///
+    /// Get all open algo (conditional) orders on a symbol, including TP/SL (Take Profit / Stop
+    /// Loss) and trailing stop orders on COIN-M Futures.
+    ///
+    /// Weight: **1** for a single symbol; **40** when the symbol parameter is omitted
+    ///
+    /// **Careful** when accessing this with no symbol.
+    ///
+    /// Security Type: USER_DATA
+    ///
+    /// Notes:
+    /// - If the symbol is not sent, orders for all symbols will be returned in an array.
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#current-all-algo-open-orders
+    [[nodiscard]] common::RestApiResponse<std::vector<CurrentAllAlgoOpenOrdersResponseInner>>
+    current_all_algo_open_orders(const CurrentAllAlgoOpenOrdersParams& params = {}) const;
+
+    /// Asynchronous `current_all_algo_open_orders()`. Completes with
+    /// `void(std::exception_ptr,
+    /// common::RestApiResponse<std::vector<CurrentAllAlgoOpenOrdersResponseInner>>)`.
+    template <class CompletionToken>
+    auto async_current_all_algo_open_orders(const CurrentAllAlgoOpenOrdersParams& params,
+                                            CompletionToken&& token) const {
+        return common::async_send<std::vector<CurrentAllAlgoOpenOrdersResponseInner>>(
+            client_, current_all_algo_open_orders_request(params),
+            std::forward<CompletionToken>(token));
+    }
+
     /// Current All Open Orders (USER_DATA)
     ///
     /// GET /dapi/v1/openOrders.
@@ -1225,6 +1668,42 @@ public:
             client_, position_information_request(params), std::forward<CompletionToken>(token));
     }
 
+    /// Query All Algo Orders (USER_DATA)
+    ///
+    /// GET /dapi/v1/allAlgoOrders.
+    ///
+    /// Get all algo (conditional) orders — active, CANCELED, TRIGGERED, or FINISHED — including
+    /// TP/SL (Take Profit / Stop Loss) and trailing stop orders on COIN-M Futures.
+    ///
+    /// * These orders will not be found:
+    ///   * order status is `CANCELED` or `EXPIRED` **AND** order has NO filled trade **AND**
+    ///   created time + 3 days < current time
+    ///   * order create time + 90 days < current time
+    ///
+    /// Weight(IP): 5
+    ///
+    /// Security Type: USER_DATA
+    ///
+    /// Notes:
+    /// - If `algoId` is set, it will get orders >= that `algoId`. Otherwise most recent orders are
+    /// returned.
+    /// - The query time period must be less than 7 days( default as the recent 7 days).
+    ///
+    /// See
+    /// https://developers.binance.com/en/docs/catalog/core-trading-derivatives-trading-coin-m-futures/api/rest-api/trade#query-all-algo-orders
+    [[nodiscard]] common::RestApiResponse<std::vector<QueryAllAlgoOrdersResponseInner>>
+    query_all_algo_orders(const QueryAllAlgoOrdersParams& params) const;
+
+    /// Asynchronous `query_all_algo_orders()`. Completes with
+    /// `void(std::exception_ptr,
+    /// common::RestApiResponse<std::vector<QueryAllAlgoOrdersResponseInner>>)`.
+    template <class CompletionToken>
+    auto async_query_all_algo_orders(const QueryAllAlgoOrdersParams& params,
+                                     CompletionToken&& token) const {
+        return common::async_send<std::vector<QueryAllAlgoOrdersResponseInner>>(
+            client_, query_all_algo_orders_request(params), std::forward<CompletionToken>(token));
+    }
+
     /// Query Current Open Order (USER_DATA)
     ///
     /// GET /dapi/v1/openOrder.
@@ -1291,6 +1770,14 @@ private:
     [[nodiscard]] common::RestRequest
     auto_cancel_all_open_orders_request(const AutoCancelAllOpenOrdersParams& params) const;
     [[nodiscard]] common::RestRequest
+    cancel_algo_order_request(const CancelAlgoOrderParams& params) const;
+    [[nodiscard]] common::RestRequest
+    new_algo_order_request(const NewAlgoOrderParams& params) const;
+    [[nodiscard]] common::RestRequest
+    query_algo_order_request(const QueryAlgoOrderParams& params) const;
+    [[nodiscard]] common::RestRequest
+    cancel_all_algo_open_orders_request(const CancelAllAlgoOpenOrdersParams& params) const;
+    [[nodiscard]] common::RestRequest
     cancel_all_open_orders_request(const CancelAllOpenOrdersParams& params) const;
     [[nodiscard]] common::RestRequest
     cancel_multiple_orders_request(const CancelMultipleOrdersParams& params) const;
@@ -1309,6 +1796,8 @@ private:
     [[nodiscard]] common::RestRequest
     change_position_mode_request(const ChangePositionModeParams& params) const;
     [[nodiscard]] common::RestRequest
+    current_all_algo_open_orders_request(const CurrentAllAlgoOpenOrdersParams& params) const;
+    [[nodiscard]] common::RestRequest
     current_all_open_orders_request(const CurrentAllOpenOrdersParams& params) const;
     [[nodiscard]] common::RestRequest
     get_order_modify_history_request(const GetOrderModifyHistoryParams& params) const;
@@ -1320,6 +1809,8 @@ private:
         const PositionAdlQuantileEstimationParams& params) const;
     [[nodiscard]] common::RestRequest
     position_information_request(const PositionInformationParams& params) const;
+    [[nodiscard]] common::RestRequest
+    query_all_algo_orders_request(const QueryAllAlgoOrdersParams& params) const;
     [[nodiscard]] common::RestRequest
     query_current_open_order_request(const QueryCurrentOpenOrderParams& params) const;
     [[nodiscard]] common::RestRequest

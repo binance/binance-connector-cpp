@@ -166,13 +166,13 @@ public:
 
     /// Bstocks Corporate Action Records (USER_DATA)
     ///
-    /// GET /sapi/v1/bstocks/corp-action.
+    /// GET /sapi/v1/bstocks/corp-action/history.
     ///
     /// Query the asset balance changes caused by corporate actions (for example stock splits and
     /// cash dividends) on the caller's account. Cursor-style pagination — supply the `nextTime` and
     /// `nextId` from the previous page's response as `lastTime` and `lastId` to fetch the next
     /// page. Records are returned in descending order of modification time. This endpoint is
-    /// equivalent to `/sapi/v1/equity/corp-action`.
+    /// equivalent to `/sapi/v1/equity/corp-action/history`.
     ///
     /// Weight: 1
     ///
@@ -195,13 +195,13 @@ public:
 
     /// Corporate Action Records (USER_DATA)
     ///
-    /// GET /sapi/v1/equity/corp-action.
+    /// GET /sapi/v1/equity/corp-action/history.
     ///
     /// Query the asset balance changes caused by corporate actions (for example stock splits and
     /// cash dividends) on the caller's account. Cursor-style pagination — supply the `nextTime` and
     /// `nextId` from the previous page's response as `lastTime` and `lastId` to fetch the next
     /// page. Records are returned in descending order of modification time. This endpoint is
-    /// equivalent to `/sapi/v1/bstocks/corp-action`.
+    /// equivalent to `/sapi/v1/bstocks/corp-action/history`.
     ///
     /// Weight: 1
     ///

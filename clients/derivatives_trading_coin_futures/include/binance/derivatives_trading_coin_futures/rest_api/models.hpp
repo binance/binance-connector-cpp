@@ -15,6 +15,8 @@
 #include <binance/derivatives_trading_coin_futures/rest_api/models/all_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/auto_cancel_all_open_orders_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/basis_response_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_algo_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_all_algo_open_orders_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_all_open_orders_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_multiple_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/cancel_order_response.hpp>
@@ -24,6 +26,7 @@
 #include <binance/derivatives_trading_coin_futures/rest_api/models/check_server_time_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/compressed_aggregate_trades_list_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/continuous_contract_kline_candlestick_data_item_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/current_all_algo_open_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/current_all_open_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/exchange_information_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/exchange_information_response_rate_limits_inner.hpp>
@@ -53,6 +56,7 @@
 #include <binance/derivatives_trading_coin_futures/rest_api/models/modify_multiple_orders_batch_orders_parameter_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/modify_multiple_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/modify_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/new_algo_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/new_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/notional_bracket_for_pair_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/notional_bracket_for_pair_response_inner_brackets_inner.hpp>
@@ -67,6 +71,8 @@
 #include <binance/derivatives_trading_coin_futures/rest_api/models/position_adl_quantile_estimation_response_inner_adl_quantile.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/position_information_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/premium_index_kline_data_item_inner.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/query_algo_order_response.hpp>
+#include <binance/derivatives_trading_coin_futures/rest_api/models/query_all_algo_orders_response_inner.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/query_current_open_order_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/query_index_price_constituents_response.hpp>
 #include <binance/derivatives_trading_coin_futures/rest_api/models/query_index_price_constituents_response_constituents_inner.hpp>

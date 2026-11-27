@@ -107,6 +107,463 @@ void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
     jv = to_string(value);
 }
 
+std::string_view to_string(NewAlgoOrderAlgoTypeEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderAlgoTypeEnum::Conditional:
+        return "CONDITIONAL";
+    case NewAlgoOrderAlgoTypeEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderAlgoTypeEnum tag_invoke(boost::json::value_to_tag<NewAlgoOrderAlgoTypeEnum> /*tag*/,
+                                    const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "CONDITIONAL") {
+        return NewAlgoOrderAlgoTypeEnum::Conditional;
+    }
+    return NewAlgoOrderAlgoTypeEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderAlgoTypeEnum value) {
+    if (value == NewAlgoOrderAlgoTypeEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderAlgoTypeEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderSideEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderSideEnum::Buy:
+        return "BUY";
+    case NewAlgoOrderSideEnum::Sell:
+        return "SELL";
+    case NewAlgoOrderSideEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderSideEnum tag_invoke(boost::json::value_to_tag<NewAlgoOrderSideEnum> /*tag*/,
+                                const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "BUY") {
+        return NewAlgoOrderSideEnum::Buy;
+    }
+    if (s == "SELL") {
+        return NewAlgoOrderSideEnum::Sell;
+    }
+    return NewAlgoOrderSideEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderSideEnum value) {
+    if (value == NewAlgoOrderSideEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderSideEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderTypeEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderTypeEnum::StopMarket:
+        return "STOP_MARKET";
+    case NewAlgoOrderTypeEnum::TakeProfitMarket:
+        return "TAKE_PROFIT_MARKET";
+    case NewAlgoOrderTypeEnum::Stop:
+        return "STOP";
+    case NewAlgoOrderTypeEnum::TakeProfit:
+        return "TAKE_PROFIT";
+    case NewAlgoOrderTypeEnum::TrailingStopMarket:
+        return "TRAILING_STOP_MARKET";
+    case NewAlgoOrderTypeEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderTypeEnum tag_invoke(boost::json::value_to_tag<NewAlgoOrderTypeEnum> /*tag*/,
+                                const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "STOP_MARKET") {
+        return NewAlgoOrderTypeEnum::StopMarket;
+    }
+    if (s == "TAKE_PROFIT_MARKET") {
+        return NewAlgoOrderTypeEnum::TakeProfitMarket;
+    }
+    if (s == "STOP") {
+        return NewAlgoOrderTypeEnum::Stop;
+    }
+    if (s == "TAKE_PROFIT") {
+        return NewAlgoOrderTypeEnum::TakeProfit;
+    }
+    if (s == "TRAILING_STOP_MARKET") {
+        return NewAlgoOrderTypeEnum::TrailingStopMarket;
+    }
+    return NewAlgoOrderTypeEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderTypeEnum value) {
+    if (value == NewAlgoOrderTypeEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderTypeEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderPositionSideEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderPositionSideEnum::Both:
+        return "BOTH";
+    case NewAlgoOrderPositionSideEnum::Long:
+        return "LONG";
+    case NewAlgoOrderPositionSideEnum::Short:
+        return "SHORT";
+    case NewAlgoOrderPositionSideEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderPositionSideEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderPositionSideEnum> /*tag*/,
+           const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "BOTH") {
+        return NewAlgoOrderPositionSideEnum::Both;
+    }
+    if (s == "LONG") {
+        return NewAlgoOrderPositionSideEnum::Long;
+    }
+    if (s == "SHORT") {
+        return NewAlgoOrderPositionSideEnum::Short;
+    }
+    return NewAlgoOrderPositionSideEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderPositionSideEnum value) {
+    if (value == NewAlgoOrderPositionSideEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderPositionSideEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderTimeInForceEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderTimeInForceEnum::Ioc:
+        return "IOC";
+    case NewAlgoOrderTimeInForceEnum::Gtc:
+        return "GTC";
+    case NewAlgoOrderTimeInForceEnum::Fok:
+        return "FOK";
+    case NewAlgoOrderTimeInForceEnum::Gtx:
+        return "GTX";
+    case NewAlgoOrderTimeInForceEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderTimeInForceEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderTimeInForceEnum> /*tag*/,
+           const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "IOC") {
+        return NewAlgoOrderTimeInForceEnum::Ioc;
+    }
+    if (s == "GTC") {
+        return NewAlgoOrderTimeInForceEnum::Gtc;
+    }
+    if (s == "FOK") {
+        return NewAlgoOrderTimeInForceEnum::Fok;
+    }
+    if (s == "GTX") {
+        return NewAlgoOrderTimeInForceEnum::Gtx;
+    }
+    return NewAlgoOrderTimeInForceEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderTimeInForceEnum value) {
+    if (value == NewAlgoOrderTimeInForceEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderTimeInForceEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderWorkingTypeEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderWorkingTypeEnum::MarkPrice:
+        return "MARK_PRICE";
+    case NewAlgoOrderWorkingTypeEnum::ContractPrice:
+        return "CONTRACT_PRICE";
+    case NewAlgoOrderWorkingTypeEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderWorkingTypeEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderWorkingTypeEnum> /*tag*/,
+           const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "MARK_PRICE") {
+        return NewAlgoOrderWorkingTypeEnum::MarkPrice;
+    }
+    if (s == "CONTRACT_PRICE") {
+        return NewAlgoOrderWorkingTypeEnum::ContractPrice;
+    }
+    return NewAlgoOrderWorkingTypeEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderWorkingTypeEnum value) {
+    if (value == NewAlgoOrderWorkingTypeEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderWorkingTypeEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderPriceMatchEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderPriceMatchEnum::Opponent:
+        return "OPPONENT";
+    case NewAlgoOrderPriceMatchEnum::Opponent5:
+        return "OPPONENT_5";
+    case NewAlgoOrderPriceMatchEnum::Opponent10:
+        return "OPPONENT_10";
+    case NewAlgoOrderPriceMatchEnum::Opponent20:
+        return "OPPONENT_20";
+    case NewAlgoOrderPriceMatchEnum::Queue:
+        return "QUEUE";
+    case NewAlgoOrderPriceMatchEnum::Queue5:
+        return "QUEUE_5";
+    case NewAlgoOrderPriceMatchEnum::Queue10:
+        return "QUEUE_10";
+    case NewAlgoOrderPriceMatchEnum::Queue20:
+        return "QUEUE_20";
+    case NewAlgoOrderPriceMatchEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderPriceMatchEnum tag_invoke(boost::json::value_to_tag<NewAlgoOrderPriceMatchEnum> /*tag*/,
+                                      const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "OPPONENT") {
+        return NewAlgoOrderPriceMatchEnum::Opponent;
+    }
+    if (s == "OPPONENT_5") {
+        return NewAlgoOrderPriceMatchEnum::Opponent5;
+    }
+    if (s == "OPPONENT_10") {
+        return NewAlgoOrderPriceMatchEnum::Opponent10;
+    }
+    if (s == "OPPONENT_20") {
+        return NewAlgoOrderPriceMatchEnum::Opponent20;
+    }
+    if (s == "QUEUE") {
+        return NewAlgoOrderPriceMatchEnum::Queue;
+    }
+    if (s == "QUEUE_5") {
+        return NewAlgoOrderPriceMatchEnum::Queue5;
+    }
+    if (s == "QUEUE_10") {
+        return NewAlgoOrderPriceMatchEnum::Queue10;
+    }
+    if (s == "QUEUE_20") {
+        return NewAlgoOrderPriceMatchEnum::Queue20;
+    }
+    return NewAlgoOrderPriceMatchEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderPriceMatchEnum value) {
+    if (value == NewAlgoOrderPriceMatchEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderPriceMatchEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderClosePositionEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderClosePositionEnum::True_:
+        return "true";
+    case NewAlgoOrderClosePositionEnum::False_:
+        return "false";
+    case NewAlgoOrderClosePositionEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderClosePositionEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderClosePositionEnum> /*tag*/,
+           const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "true") {
+        return NewAlgoOrderClosePositionEnum::True_;
+    }
+    if (s == "false") {
+        return NewAlgoOrderClosePositionEnum::False_;
+    }
+    return NewAlgoOrderClosePositionEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderClosePositionEnum value) {
+    if (value == NewAlgoOrderClosePositionEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderClosePositionEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderPriceProtectEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderPriceProtectEnum::True_:
+        return "true";
+    case NewAlgoOrderPriceProtectEnum::False_:
+        return "false";
+    case NewAlgoOrderPriceProtectEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderPriceProtectEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderPriceProtectEnum> /*tag*/,
+           const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "true") {
+        return NewAlgoOrderPriceProtectEnum::True_;
+    }
+    if (s == "false") {
+        return NewAlgoOrderPriceProtectEnum::False_;
+    }
+    return NewAlgoOrderPriceProtectEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderPriceProtectEnum value) {
+    if (value == NewAlgoOrderPriceProtectEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderPriceProtectEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderReduceOnlyEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderReduceOnlyEnum::True_:
+        return "true";
+    case NewAlgoOrderReduceOnlyEnum::False_:
+        return "false";
+    case NewAlgoOrderReduceOnlyEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderReduceOnlyEnum tag_invoke(boost::json::value_to_tag<NewAlgoOrderReduceOnlyEnum> /*tag*/,
+                                      const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "true") {
+        return NewAlgoOrderReduceOnlyEnum::True_;
+    }
+    if (s == "false") {
+        return NewAlgoOrderReduceOnlyEnum::False_;
+    }
+    return NewAlgoOrderReduceOnlyEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderReduceOnlyEnum value) {
+    if (value == NewAlgoOrderReduceOnlyEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderReduceOnlyEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderNewOrderRespTypeEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderNewOrderRespTypeEnum::Ack:
+        return "ACK";
+    case NewAlgoOrderNewOrderRespTypeEnum::Result:
+        return "RESULT";
+    case NewAlgoOrderNewOrderRespTypeEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderNewOrderRespTypeEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderNewOrderRespTypeEnum> /*tag*/,
+           const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "ACK") {
+        return NewAlgoOrderNewOrderRespTypeEnum::Ack;
+    }
+    if (s == "RESULT") {
+        return NewAlgoOrderNewOrderRespTypeEnum::Result;
+    }
+    return NewAlgoOrderNewOrderRespTypeEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderNewOrderRespTypeEnum value) {
+    if (value == NewAlgoOrderNewOrderRespTypeEnum::Unknown) {
+        throw std::invalid_argument("NewAlgoOrderNewOrderRespTypeEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
+std::string_view to_string(NewAlgoOrderSelfTradePreventionModeEnum value) noexcept {
+    switch (value) {
+    case NewAlgoOrderSelfTradePreventionModeEnum::None_:
+        return "NONE";
+    case NewAlgoOrderSelfTradePreventionModeEnum::ExpireTaker:
+        return "EXPIRE_TAKER";
+    case NewAlgoOrderSelfTradePreventionModeEnum::ExpireBoth:
+        return "EXPIRE_BOTH";
+    case NewAlgoOrderSelfTradePreventionModeEnum::ExpireMaker:
+        return "EXPIRE_MAKER";
+    case NewAlgoOrderSelfTradePreventionModeEnum::Unknown:
+        break;
+    }
+    return "";
+}
+
+NewAlgoOrderSelfTradePreventionModeEnum
+tag_invoke(boost::json::value_to_tag<NewAlgoOrderSelfTradePreventionModeEnum> /*tag*/,
+           const boost::json::value& jv) {
+    const std::string_view s = jv.as_string();
+    if (s == "NONE") {
+        return NewAlgoOrderSelfTradePreventionModeEnum::None_;
+    }
+    if (s == "EXPIRE_TAKER") {
+        return NewAlgoOrderSelfTradePreventionModeEnum::ExpireTaker;
+    }
+    if (s == "EXPIRE_BOTH") {
+        return NewAlgoOrderSelfTradePreventionModeEnum::ExpireBoth;
+    }
+    if (s == "EXPIRE_MAKER") {
+        return NewAlgoOrderSelfTradePreventionModeEnum::ExpireMaker;
+    }
+    return NewAlgoOrderSelfTradePreventionModeEnum::Unknown;
+}
+
+void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
+                NewAlgoOrderSelfTradePreventionModeEnum value) {
+    if (value == NewAlgoOrderSelfTradePreventionModeEnum::Unknown) {
+        throw std::invalid_argument(
+            "NewAlgoOrderSelfTradePreventionModeEnum::Unknown cannot be sent");
+    }
+    jv = to_string(value);
+}
+
 std::string_view to_string(NewOrderSideEnum value) noexcept {
     switch (value) {
     case NewOrderSideEnum::Buy:
@@ -543,6 +1000,22 @@ void tag_invoke(boost::json::value_from_tag /*tag*/, boost::json::value& jv,
 
 TradeApi::TradeApi(std::shared_ptr<common::WebsocketApi> client) : client_(std::move(client)) {}
 
+common::Params TradeApi::cancel_algo_order_payload(const CancelAlgoOrderParams& params) {
+    common::Params p;
+    common::detail::json::set_param(p, "id", params.id);
+    common::detail::json::set_param(p, "algoId", params.algo_id);
+    common::detail::json::set_param(p, "clientAlgoId", params.client_algo_id);
+    common::detail::json::set_param(p, "recvWindow", params.recv_window);
+    return p;
+}
+
+common::WebsocketApiResponse<CancelAlgoOrderResponseResult>
+TradeApi::cancel_algo_order(const CancelAlgoOrderParams& params) const {
+    return common::send<CancelAlgoOrderResponseResult>(*client_, "algoOrder.cancel",
+                                                       cancel_algo_order_payload(params),
+                                                       make_options(false, true, false, false));
+}
+
 common::Params TradeApi::cancel_order_payload(const CancelOrderParams& params) {
     common::Params p;
     common::detail::json::set_param(p, "symbol", params.symbol);
@@ -580,6 +1053,40 @@ TradeApi::modify_order(const ModifyOrderParams& params) const {
     return common::send<ModifyOrderResponseResult>(*client_, "order.modify",
                                                    modify_order_payload(params),
                                                    make_options(false, true, false, false));
+}
+
+common::Params TradeApi::new_algo_order_payload(const NewAlgoOrderParams& params) {
+    common::Params p;
+    common::detail::json::set_param(p, "algoType", params.algo_type);
+    common::detail::json::set_param(p, "symbol", params.symbol);
+    common::detail::json::set_param(p, "side", params.side);
+    common::detail::json::set_param(p, "type", params.type);
+    common::detail::json::set_param(p, "id", params.id);
+    common::detail::json::set_param(p, "positionSide", params.position_side);
+    common::detail::json::set_param(p, "timeInForce", params.time_in_force);
+    common::detail::json::set_param(p, "quantity", params.quantity);
+    common::detail::json::set_param(p, "price", params.price);
+    common::detail::json::set_param(p, "triggerPrice", params.trigger_price);
+    common::detail::json::set_param(p, "workingType", params.working_type);
+    common::detail::json::set_param(p, "priceMatch", params.price_match);
+    common::detail::json::set_param(p, "closePosition", params.close_position);
+    common::detail::json::set_param(p, "priceProtect", params.price_protect);
+    common::detail::json::set_param(p, "reduceOnly", params.reduce_only);
+    common::detail::json::set_param(p, "activatePrice", params.activate_price);
+    common::detail::json::set_param(p, "callbackRate", params.callback_rate);
+    common::detail::json::set_param(p, "clientAlgoId", params.client_algo_id);
+    common::detail::json::set_param(p, "newOrderRespType", params.new_order_resp_type);
+    common::detail::json::set_param(p, "selfTradePreventionMode",
+                                    params.self_trade_prevention_mode);
+    common::detail::json::set_param(p, "recvWindow", params.recv_window);
+    return p;
+}
+
+common::WebsocketApiResponse<NewAlgoOrderResponseResult>
+TradeApi::new_algo_order(const NewAlgoOrderParams& params) const {
+    return common::send<NewAlgoOrderResponseResult>(*client_, "algoOrder.place",
+                                                    new_algo_order_payload(params),
+                                                    make_options(false, true, false, false));
 }
 
 common::Params TradeApi::new_order_payload(const NewOrderParams& params) {

@@ -126,7 +126,7 @@ common::RestRequest TokenizedApi::bstocks_corporate_action_records_request(
     const BstocksCorporateActionRecordsParams& params) const {
     common::RestRequest req;
     req.method = common::HttpMethod::Get;
-    req.endpoint = "/sapi/v1/bstocks/corp-action";
+    req.endpoint = "/sapi/v1/bstocks/corp-action/history";
     common::detail::json::set_param(req.query, "limit", params.limit);
     common::detail::json::set_param(req.query, "lastTime", params.last_time);
     common::detail::json::set_param(req.query, "lastId", params.last_id);
@@ -147,7 +147,7 @@ common::RestRequest
 TokenizedApi::corporate_action_records_request(const CorporateActionRecordsParams& params) const {
     common::RestRequest req;
     req.method = common::HttpMethod::Get;
-    req.endpoint = "/sapi/v1/equity/corp-action";
+    req.endpoint = "/sapi/v1/equity/corp-action/history";
     common::detail::json::set_param(req.query, "limit", params.limit);
     common::detail::json::set_param(req.query, "lastTime", params.last_time);
     common::detail::json::set_param(req.query, "lastId", params.last_id);

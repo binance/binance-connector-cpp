@@ -58,7 +58,7 @@ TEST(RestApiTokenizedApi, BstocksCorporateActionRecords) {
 
     const auto rec = server.requests().at(0);
     EXPECT_EQ(rec.method, "GET");
-    EXPECT_EQ(rec.path(), "/sapi/v1/bstocks/corp-action");
+    EXPECT_EQ(rec.path(), "/sapi/v1/bstocks/corp-action/history");
     EXPECT_NE((rec.query() + "&" + rec.body).find("limit="), std::string::npos);
     EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
     EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
@@ -111,7 +111,7 @@ TEST(RestApiTokenizedApi, CorporateActionRecords) {
 
     const auto rec = server.requests().at(0);
     EXPECT_EQ(rec.method, "GET");
-    EXPECT_EQ(rec.path(), "/sapi/v1/equity/corp-action");
+    EXPECT_EQ(rec.path(), "/sapi/v1/equity/corp-action/history");
     EXPECT_NE((rec.query() + "&" + rec.body).find("limit="), std::string::npos);
     EXPECT_EQ(rec.header("x-mbx-apikey"), "key");
     EXPECT_NE((rec.query() + rec.body).find("signature="), std::string::npos);
